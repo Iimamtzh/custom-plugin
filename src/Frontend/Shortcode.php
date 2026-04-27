@@ -16,6 +16,7 @@ if (!defined('ABSPATH')) {
 class Shortcode
 {
     private static $property_gallery_assets_printed = false;
+    private static $mortgage_assets_printed = false;
 
     public function __construct()
     {
@@ -24,6 +25,7 @@ class Shortcode
         add_shortcode('search', array($this, 'search_shortcode'));
         add_shortcode('property_price', array($this, 'shortcode_property_price'));
         add_shortcode('property_gallery', array($this, 'property_gallery_shortcode'));
+        add_shortcode('simulasi_kpr', array($this, 'mortgage_simulation_shortcode'));
         add_action('pre_get_posts', array($this, 'filter_property_search_query'));
 
         // add_shortcode('custom_hello', array($this, 'hello_shortcode'));
@@ -531,6 +533,692 @@ class Shortcode
         } else {
             echo 'Hubungi Kami';
         }
+
+        return ob_get_clean();
+    }
+
+    public function mortgage_simulation_shortcode($atts)
+    {
+        global $post;
+
+        $post_id = 0;
+
+        if ($post instanceof \WP_Post) {
+            $post_id = (int) $post->ID;
+        }
+
+        $default_price = $post_id ? (float) get_post_meta($post_id, 'property_price', true) : 0;
+
+        $atts = shortcode_atts(
+            array(
+                'price'             => $default_price,
+                'down_payment_pct'  => 20,
+                'fixed_rate'        => 7,
+                'floating_rate'     => 12,
+                'fixed_years'       => 3,
+                'loan_years'        => 10,
+                'other_costs_pct'   => 6,
+                'wa_link'           => '',
+                'subtitle'          => 'Estimate your home loan financing with this mortgage calculator',
+                'button_label'      => 'Simulasikan',
+                'contact_label'     => 'Tanya KPR',
+            ),
+            $atts,
+            'simulasi_kpr'
+        );
+
+        $price = max(0, (float) $atts['price']);
+        $down_payment_pct = min(90, max(10, (float) $atts['down_payment_pct']));
+        $fixed_rate = min(30, max(1, (float) $atts['fixed_rate']));
+        $floating_rate = min(35, max($fixed_rate, (float) $atts['floating_rate']));
+        $fixed_years = min(25, max(1, (int) $atts['fixed_years']));
+        $loan_years = min(25, max($fixed_years, (int) $atts['loan_years']));
+        $other_costs_pct = min(15, max(0, (float) $atts['other_costs_pct']));
+
+        if (!$price) {
+            return '';
+        }
+
+        $down_payment_amount = $price * ($down_payment_pct / 100);
+        $simulation = $this->calculate_mortgage_simulation(
+            $price,
+            $down_payment_amount,
+            $fixed_rate,
+            $floating_rate,
+            $fixed_years,
+            $loan_years,
+            $other_costs_pct
+        );
+
+        $simulator_id = wp_unique_id('custom-kpr-simulator-');
+        $output = '';
+
+        if (!self::$mortgage_assets_printed) {
+            $output .= $this->get_mortgage_simulation_assets();
+            self::$mortgage_assets_printed = true;
+        }
+
+        $output .= Template::get('frontend/mortgage-simulation', array(
+            'simulator_id'         => $simulator_id,
+            'post_id'              => $post_id,
+            'post_title'           => $post_id ? get_the_title($post_id) : '',
+            'subtitle'             => sanitize_text_field($atts['subtitle']),
+            'button_label'         => sanitize_text_field($atts['button_label']),
+            'contact_label'        => sanitize_text_field($atts['contact_label']),
+            'wa_link'              => esc_url_raw($atts['wa_link']),
+            'initial_values'       => array(
+                'price'             => $price,
+                'down_payment_pct'  => $down_payment_pct,
+                'down_payment_amt'  => $down_payment_amount,
+                'fixed_rate'        => $fixed_rate,
+                'floating_rate'     => $floating_rate,
+                'fixed_years'       => $fixed_years,
+                'loan_years'        => $loan_years,
+                'other_costs_pct'   => $other_costs_pct,
+            ),
+            'initial_result'       => $simulation,
+        ));
+
+        return $output;
+    }
+
+    private function calculate_mortgage_simulation($price, $down_payment_amount, $fixed_rate, $floating_rate, $fixed_years, $loan_years, $other_costs_pct)
+    {
+        $price = max(0, (float) $price);
+        $down_payment_amount = max(0, min($price, (float) $down_payment_amount));
+        $fixed_rate = max(0.01, (float) $fixed_rate);
+        $floating_rate = max($fixed_rate, (float) $floating_rate);
+        $fixed_years = max(1, (int) $fixed_years);
+        $loan_years = max($fixed_years, (int) $loan_years);
+        $other_costs_pct = max(0, (float) $other_costs_pct);
+
+        $principal = max(0, $price - $down_payment_amount);
+        $total_months = $loan_years * 12;
+        $fixed_months = min($total_months, $fixed_years * 12);
+        $floating_months = max(0, $total_months - $fixed_months);
+
+        $fixed_payment = $this->calculate_annuity_payment($principal, $fixed_rate, $total_months);
+        $remaining_balance = $this->calculate_remaining_balance($principal, $fixed_rate, $total_months, $fixed_months, $fixed_payment);
+        $floating_payment = $floating_months > 0 ? $this->calculate_annuity_payment($remaining_balance, $floating_rate, $floating_months) : 0;
+
+        $total_paid_fixed = $fixed_payment * $fixed_months;
+        $total_paid_floating = $floating_payment * $floating_months;
+        $total_installment_paid = $total_paid_fixed + $total_paid_floating;
+        $total_interest = max(0, $total_installment_paid - $principal);
+        $other_costs = $price * ($other_costs_pct / 100);
+        $first_payment_total = $down_payment_amount + $fixed_payment + $other_costs;
+
+        return array(
+            'price'                   => $price,
+            'down_payment_amount'     => $down_payment_amount,
+            'down_payment_pct'        => $price > 0 ? ($down_payment_amount / $price) * 100 : 0,
+            'principal'               => $principal,
+            'fixed_rate'              => $fixed_rate,
+            'floating_rate'           => $floating_rate,
+            'fixed_years'             => $fixed_years,
+            'loan_years'              => $loan_years,
+            'fixed_monthly_payment'   => $fixed_payment,
+            'floating_monthly_payment'=> $floating_payment,
+            'remaining_balance'       => $remaining_balance,
+            'other_costs'             => $other_costs,
+            'other_costs_pct'         => $other_costs_pct,
+            'first_payment_total'     => $first_payment_total,
+            'first_installment'       => $fixed_payment,
+            'total_interest'          => $total_interest,
+            'total_loan_cost'         => $principal + $total_interest,
+            'fixed_period_label'      => sprintf('Fix %d tahun, Floating %d tahun', $fixed_years, max(0, $loan_years - $fixed_years)),
+        );
+    }
+
+    private function calculate_annuity_payment($principal, $annual_rate, $months)
+    {
+        $principal = (float) $principal;
+        $annual_rate = (float) $annual_rate;
+        $months = (int) $months;
+
+        if ($principal <= 0 || $months <= 0) {
+            return 0;
+        }
+
+        $monthly_rate = ($annual_rate / 100) / 12;
+
+        if ($monthly_rate <= 0) {
+            return $principal / $months;
+        }
+
+        return $principal * ($monthly_rate / (1 - pow(1 + $monthly_rate, -$months)));
+    }
+
+    private function calculate_remaining_balance($principal, $annual_rate, $months, $paid_months, $payment)
+    {
+        $principal = (float) $principal;
+        $months = (int) $months;
+        $paid_months = (int) $paid_months;
+        $payment = (float) $payment;
+        $monthly_rate = ((float) $annual_rate / 100) / 12;
+
+        if ($principal <= 0 || $months <= 0 || $paid_months <= 0) {
+            return max(0, $principal);
+        }
+
+        if ($monthly_rate <= 0) {
+            return max(0, $principal - ($payment * $paid_months));
+        }
+
+        $growth = pow(1 + $monthly_rate, $paid_months);
+        $remaining = ($principal * $growth) - ($payment * (($growth - 1) / $monthly_rate));
+
+        return max(0, $remaining);
+    }
+
+    private function get_mortgage_simulation_assets()
+    {
+        ob_start();
+        ?>
+        <style>
+            .custom-kpr-simulator {
+                display: grid;
+                grid-template-columns: minmax(0, 1.05fr) minmax(320px, 1fr);
+                gap: 22px;
+                margin: 28px 0;
+            }
+
+            .custom-kpr-simulator__panel,
+            .custom-kpr-simulator__summary {
+                border-radius: 18px;
+                background: #fff;
+                box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
+            }
+
+            .custom-kpr-simulator__panel {
+                position: relative;
+                padding: 28px 26px;
+                border-top: 6px solid #e32020;
+            }
+
+            .custom-kpr-simulator__summary {
+                padding: 18px;
+                background: #f6f7fb;
+            }
+
+            .custom-kpr-simulator__title {
+                margin: 0;
+                font-size: 2rem;
+                line-height: 1.1;
+                color: #0f172a;
+            }
+
+            .custom-kpr-simulator__subtitle {
+                margin: 10px 0 26px;
+                max-width: 520px;
+                color: #64748b;
+                font-size: 1.05rem;
+                line-height: 1.6;
+            }
+
+            .custom-kpr-simulator__form {
+                display: grid;
+                gap: 28px;
+            }
+
+            .custom-kpr-simulator__group {
+                display: grid;
+                gap: 14px;
+            }
+
+            .custom-kpr-simulator__group--compact {
+                gap: 10px;
+            }
+
+            .custom-kpr-simulator__label-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+            }
+
+            .custom-kpr-simulator__label {
+                font-weight: 600;
+                color: #0f172a;
+            }
+
+            .custom-kpr-simulator__value-row {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) minmax(184px, 1fr);
+                gap: 12px;
+                align-items: center;
+            }
+
+            .custom-kpr-simulator__field,
+            .custom-kpr-simulator__field-inline {
+                display: flex;
+                align-items: stretch;
+                width: 100%;
+                border: 1px solid #cbd5e1;
+                border-radius: 8px;
+                background: #fff;
+                overflow: hidden;
+            }
+
+            .custom-kpr-simulator__prefix,
+            .custom-kpr-simulator__suffix {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 54px;
+                padding: 0 14px;
+                background: #f8fafc;
+                color: #0f172a;
+                font-weight: 500;
+                border-right: 1px solid #cbd5e1;
+            }
+
+            .custom-kpr-simulator__suffix {
+                border-right: 0;
+                border-left: 1px solid #cbd5e1;
+            }
+
+            .custom-kpr-simulator__input {
+                width: 100%;
+                min-height: 44px;
+                border: 0;
+                padding: 0 14px;
+                font-size: 1rem;
+                color: #0f172a;
+                background: transparent;
+            }
+
+            .custom-kpr-simulator__slider {
+                width: 100%;
+                accent-color: #e32020;
+            }
+
+            .custom-kpr-simulator__scale {
+                display: flex;
+                justify-content: space-between;
+                gap: 12px;
+                color: #94a3b8;
+                font-size: 0.9rem;
+            }
+
+            .custom-kpr-simulator__button {
+                min-height: 50px;
+                border: 0;
+                border-radius: 8px;
+                background: #e32020;
+                color: #fff;
+                font-size: 1rem;
+                font-weight: 700;
+                cursor: pointer;
+            }
+
+            .custom-kpr-simulator__summary-badge {
+                display: inline-flex;
+                margin: -18px 0 0 -18px;
+                padding: 10px 14px;
+                border-radius: 8px 8px 0 0;
+                background: #e32020;
+                color: #fff;
+                font-size: 0.85rem;
+                font-weight: 700;
+            }
+
+            .custom-kpr-simulator__summary-card,
+            .custom-kpr-simulator__detail-card {
+                margin-top: 18px;
+                border: 1px solid #e5e7eb;
+                border-radius: 12px;
+                background: #fff;
+            }
+
+            .custom-kpr-simulator__summary-meta {
+                display: grid;
+                grid-template-columns: 1.7fr repeat(3, minmax(0, 1fr));
+                gap: 10px;
+                padding: 16px 18px;
+                color: #94a3b8;
+                font-size: 0.86rem;
+            }
+
+            .custom-kpr-simulator__summary-meta strong {
+                display: block;
+                margin-top: 6px;
+                color: #0f172a;
+                font-size: 0.95rem;
+            }
+
+            .custom-kpr-simulator__hero {
+                margin-top: 22px;
+                padding: 18px;
+                border-radius: 12px;
+                background: #fff1f2;
+            }
+
+            .custom-kpr-simulator__hero-title {
+                margin: 0 0 14px;
+                color: #0f172a;
+                font-size: 1.2rem;
+            }
+
+            .custom-kpr-simulator__hero-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 18px;
+                flex-wrap: wrap;
+            }
+
+            .custom-kpr-simulator__hero-copy {
+                color: #334155;
+                line-height: 1.7;
+            }
+
+            .custom-kpr-simulator__hero-copy strong {
+                display: block;
+                margin-top: 4px;
+                color: #0f172a;
+                font-size: 1.2rem;
+            }
+
+            .custom-kpr-simulator__contact {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 12px 18px;
+                border-radius: 8px;
+                background: #e32020;
+                color: #fff;
+                text-decoration: none;
+                font-weight: 700;
+            }
+
+            .custom-kpr-simulator__details-title {
+                margin: 22px 2px 12px;
+                color: #0f172a;
+                font-size: 1.2rem;
+            }
+
+            .custom-kpr-simulator__detail-card {
+                padding: 14px 18px;
+            }
+
+            .custom-kpr-simulator__detail-head,
+            .custom-kpr-simulator__detail-item {
+                display: flex;
+                justify-content: space-between;
+                gap: 18px;
+            }
+
+            .custom-kpr-simulator__detail-head {
+                margin-bottom: 10px;
+                color: #0f172a;
+                font-weight: 700;
+            }
+
+            .custom-kpr-simulator__detail-item {
+                padding: 4px 0;
+                color: #64748b;
+            }
+
+            .custom-kpr-simulator__detail-item span:last-child,
+            .custom-kpr-simulator__detail-head span:last-child {
+                color: #0f172a;
+                font-weight: 600;
+                text-align: right;
+            }
+
+            .custom-kpr-simulator__disclaimer {
+                margin: 18px 4px 0;
+                color: #64748b;
+                font-size: 0.84rem;
+                line-height: 1.6;
+            }
+
+            @media (max-width: 991px) {
+                .custom-kpr-simulator {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            @media (max-width: 767px) {
+                .custom-kpr-simulator__panel,
+                .custom-kpr-simulator__summary {
+                    padding: 18px 16px;
+                }
+
+                .custom-kpr-simulator__title {
+                    font-size: 1.65rem;
+                }
+
+                .custom-kpr-simulator__value-row,
+                .custom-kpr-simulator__summary-meta {
+                    grid-template-columns: 1fr;
+                }
+
+                .custom-kpr-simulator__summary-badge {
+                    margin: -18px 0 0 -16px;
+                }
+
+                .custom-kpr-simulator__hero-row,
+                .custom-kpr-simulator__detail-head,
+                .custom-kpr-simulator__detail-item {
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+
+                .custom-kpr-simulator__detail-item span:last-child,
+                .custom-kpr-simulator__detail-head span:last-child {
+                    text-align: left;
+                }
+            }
+        </style>
+        <script>
+            (function () {
+                if (window.customKprSimulatorInit) {
+                    return;
+                }
+
+                window.customKprSimulatorInit = true;
+
+                document.addEventListener('input', function (event) {
+                    var root = event.target.closest('[data-kpr-simulator]');
+
+                    if (!root) {
+                        return;
+                    }
+
+                    syncSimulatorInputs(root, event.target);
+                });
+
+                document.addEventListener('submit', function (event) {
+                    var form = event.target.closest('[data-kpr-form]');
+
+                    if (!form) {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    renderSimulator(form.closest('[data-kpr-simulator]'));
+                });
+
+                function syncSimulatorInputs(root, source) {
+                    var priceInput = root.querySelector('[data-kpr-price]');
+                    var dpPctInput = root.querySelector('[data-kpr-dp-pct]');
+                    var dpAmtInput = root.querySelector('[data-kpr-dp-amt]');
+                    var fixedRateInput = root.querySelector('[data-kpr-fixed-rate]');
+                    var floatingRateInput = root.querySelector('[data-kpr-floating-rate]');
+                    var fixedYearsInput = root.querySelector('[data-kpr-fixed-years]');
+                    var loanYearsInput = root.querySelector('[data-kpr-loan-years]');
+                    var dpSlider = root.querySelector('[data-kpr-dp-slider]');
+                    var fixedYearsSlider = root.querySelector('[data-kpr-fixed-years-slider]');
+                    var loanYearsSlider = root.querySelector('[data-kpr-loan-years-slider]');
+
+                    var price = parseNumber(priceInput.value);
+                    var dpPct = clamp(parseNumber(dpPctInput.value), 10, 90);
+                    var dpAmt = clamp(parseNumber(dpAmtInput.value), 0, price);
+                    var fixedRate = clamp(parseNumber(fixedRateInput.value), 1, 30);
+                    var floatingRate = clamp(parseNumber(floatingRateInput.value), fixedRate, 35);
+                    var fixedYears = clamp(parseInt(fixedYearsInput.value || 0, 10), 1, 25);
+                    var loanYears = clamp(parseInt(loanYearsInput.value || 0, 10), fixedYears, 25);
+
+                    if (source === dpAmtInput) {
+                        dpPct = price > 0 ? (dpAmt / price) * 100 : 0;
+                    } else {
+                        dpAmt = price * (dpPct / 100);
+                    }
+
+                    if (source === fixedYearsInput || source === fixedYearsSlider) {
+                        loanYears = Math.max(loanYears, fixedYears);
+                    }
+
+                    dpPct = clamp(dpPct, 10, 90);
+                    dpAmt = clamp(dpAmt, 0, price);
+                    floatingRate = clamp(floatingRate, fixedRate, 35);
+                    loanYears = clamp(loanYears, fixedYears, 25);
+
+                    priceInput.value = formatInteger(price);
+                    dpPctInput.value = formatDecimal(dpPct);
+                    dpAmtInput.value = formatInteger(dpAmt);
+                    fixedRateInput.value = formatDecimal(fixedRate);
+                    floatingRateInput.value = formatDecimal(floatingRate);
+                    fixedYearsInput.value = String(fixedYears);
+                    loanYearsInput.value = String(loanYears);
+                    dpSlider.value = String(Math.round(dpPct));
+                    fixedYearsSlider.value = String(fixedYears);
+                    loanYearsSlider.value = String(loanYears);
+                }
+
+                function renderSimulator(root) {
+                    if (!root) {
+                        return;
+                    }
+
+                    var price = parseNumber(root.querySelector('[data-kpr-price]').value);
+                    var dpPct = clamp(parseNumber(root.querySelector('[data-kpr-dp-pct]').value), 10, 90);
+                    var dpAmt = clamp(parseNumber(root.querySelector('[data-kpr-dp-amt]').value), 0, price);
+                    var fixedRate = clamp(parseNumber(root.querySelector('[data-kpr-fixed-rate]').value), 1, 30);
+                    var floatingRate = clamp(parseNumber(root.querySelector('[data-kpr-floating-rate]').value), fixedRate, 35);
+                    var fixedYears = clamp(parseInt(root.querySelector('[data-kpr-fixed-years]').value || 0, 10), 1, 25);
+                    var loanYears = clamp(parseInt(root.querySelector('[data-kpr-loan-years]').value || 0, 10), fixedYears, 25);
+                    var otherCostsPct = parseNumber(root.getAttribute('data-other-costs-pct'));
+
+                    var result = calculateSimulation(price, dpAmt, fixedRate, floatingRate, fixedYears, loanYears, otherCostsPct);
+
+                    setText(root, '[data-kpr-period]', 'Fix ' + fixedYears + ' tahun, Floating ' + Math.max(0, loanYears - fixedYears) + ' tahun');
+                    setTextAll(root, '[data-kpr-fixed-rate-output]', formatPercent(fixedRate));
+                    setText(root, '[data-kpr-fixed-years-output]', fixedYears + ' Tahun');
+                    setText(root, '[data-kpr-loan-years-output]', loanYears + ' Tahun');
+                    setText(root, '[data-kpr-fixed-payment]', formatCurrency(result.fixedMonthlyPayment));
+                    setText(root, '[data-kpr-floating-payment]', formatCurrency(result.floatingMonthlyPayment));
+                    setText(root, '[data-kpr-first-total]', formatCurrency(result.firstPaymentTotal));
+                    setText(root, '[data-kpr-down-payment-output]', formatCurrency(result.downPaymentAmount));
+                    setText(root, '[data-kpr-first-installment-output]', formatCurrency(result.fixedMonthlyPayment));
+                    setText(root, '[data-kpr-other-costs-output]', formatCurrency(result.otherCosts));
+                    setText(root, '[data-kpr-total-loan-cost]', formatCurrency(result.totalLoanCost));
+                    setText(root, '[data-kpr-principal-output]', formatCurrency(result.principal));
+                    setText(root, '[data-kpr-interest-output]', formatCurrency(result.totalInterest));
+                }
+
+                function calculateSimulation(price, downPaymentAmount, fixedRate, floatingRate, fixedYears, loanYears, otherCostsPct) {
+                    var principal = Math.max(0, price - downPaymentAmount);
+                    var totalMonths = loanYears * 12;
+                    var fixedMonths = Math.min(totalMonths, fixedYears * 12);
+                    var floatingMonths = Math.max(0, totalMonths - fixedMonths);
+                    var fixedMonthlyPayment = annuity(principal, fixedRate, totalMonths);
+                    var remainingBalance = balanceAfter(principal, fixedRate, totalMonths, fixedMonths, fixedMonthlyPayment);
+                    var floatingMonthlyPayment = floatingMonths > 0 ? annuity(remainingBalance, floatingRate, floatingMonths) : 0;
+                    var totalInstallmentPaid = (fixedMonthlyPayment * fixedMonths) + (floatingMonthlyPayment * floatingMonths);
+                    var totalInterest = Math.max(0, totalInstallmentPaid - principal);
+                    var otherCosts = price * (otherCostsPct / 100);
+
+                    return {
+                        principal: principal,
+                        fixedMonthlyPayment: fixedMonthlyPayment,
+                        floatingMonthlyPayment: floatingMonthlyPayment,
+                        totalInterest: totalInterest,
+                        totalLoanCost: principal + totalInterest,
+                        otherCosts: otherCosts,
+                        downPaymentAmount: downPaymentAmount,
+                        firstPaymentTotal: downPaymentAmount + fixedMonthlyPayment + otherCosts
+                    };
+                }
+
+                function annuity(principal, annualRate, months) {
+                    if (principal <= 0 || months <= 0) {
+                        return 0;
+                    }
+
+                    var monthlyRate = (annualRate / 100) / 12;
+
+                    if (monthlyRate <= 0) {
+                        return principal / months;
+                    }
+
+                    return principal * (monthlyRate / (1 - Math.pow(1 + monthlyRate, -months)));
+                }
+
+                function balanceAfter(principal, annualRate, months, paidMonths, payment) {
+                    if (principal <= 0 || months <= 0 || paidMonths <= 0) {
+                        return Math.max(0, principal);
+                    }
+
+                    var monthlyRate = (annualRate / 100) / 12;
+
+                    if (monthlyRate <= 0) {
+                        return Math.max(0, principal - (payment * paidMonths));
+                    }
+
+                    var growth = Math.pow(1 + monthlyRate, paidMonths);
+                    return Math.max(0, (principal * growth) - (payment * ((growth - 1) / monthlyRate)));
+                }
+
+                function parseNumber(value) {
+                    return Number(String(value || '').replace(/[^\d.]/g, '')) || 0;
+                }
+
+                function formatInteger(value) {
+                    return Math.round(value).toString();
+                }
+
+                function formatDecimal(value) {
+                    return (Math.round(value * 100) / 100).toString().replace(/\.00$/, '').replace(/(\.\d)0$/, '$1');
+                }
+
+                function formatCurrency(value) {
+                    return 'Rp' + new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(Math.round(value));
+                }
+
+                function formatPercent(value) {
+                    return formatDecimal(value) + '%';
+                }
+
+                function clamp(value, min, max) {
+                    return Math.min(Math.max(value, min), max);
+                }
+
+                function setText(root, selector, value) {
+                    var element = root.querySelector(selector);
+
+                    if (element) {
+                        element.textContent = value;
+                    }
+                }
+
+                function setTextAll(root, selector, value) {
+                    root.querySelectorAll(selector).forEach(function (element) {
+                        element.textContent = value;
+                    });
+                }
+
+                document.addEventListener('DOMContentLoaded', function () {
+                    document.querySelectorAll('[data-kpr-simulator]').forEach(function (root) {
+                        syncSimulatorInputs(root, root.querySelector('[data-kpr-dp-pct]'));
+                        renderSimulator(root);
+                    });
+                });
+            }());
+        </script>
+        <?php
 
         return ob_get_clean();
     }
