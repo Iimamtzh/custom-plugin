@@ -21,6 +21,7 @@ class Shortcode
         add_shortcode('compare', array($this, 'compare_shortcode'));
         add_shortcode('property_search', array($this, 'property_search_shortcode'));
         add_shortcode('search', array($this, 'search_shortcode'));
+        add_shortcode('property_price', array($this, 'shortcode_property_price'));
         add_action('pre_get_posts', array($this, 'filter_property_search_query'));
 
         // add_shortcode('custom_hello', array($this, 'hello_shortcode'));
@@ -491,5 +492,25 @@ class Shortcode
 
         // 3. Render using Template Engine (Separation of Concerns)
         return Template::get('frontend/hello-message', $data);
+    }
+    
+    public function shortcode_property_price() {
+        global $post;
+    
+        ob_start();
+    
+        if (!$post) {
+            return '';
+        }
+    
+        $price = get_post_meta($post->ID, 'property_price', true);
+    
+        if (!empty($price)) {
+            echo 'Rp ' . number_format((float) $price, 0, ',', '.');
+        } else {
+            echo 'Hubungi Kami';
+        }
+    
+        return ob_get_clean();
     }
 }

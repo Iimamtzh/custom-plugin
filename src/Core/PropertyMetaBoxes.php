@@ -28,7 +28,7 @@ class PropertyMetaBoxes
                     'id'   => 'property_price',
                     'type' => 'number',
                     'min'  => 0,
-                    'step' => 1000000,
+                    'step' => 1,
                 ),
                 array(
                     'name' => 'Catatan Harga',
