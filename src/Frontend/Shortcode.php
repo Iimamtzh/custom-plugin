@@ -15,6 +15,7 @@ if (!defined('ABSPATH')) {
  */
 class Shortcode
 {
+    private static $property_gallery_assets_printed = false;
 
     public function __construct()
     {
@@ -22,6 +23,7 @@ class Shortcode
         add_shortcode('property_search', array($this, 'property_search_shortcode'));
         add_shortcode('search', array($this, 'search_shortcode'));
         add_shortcode('property_price', array($this, 'shortcode_property_price'));
+        add_shortcode('property_gallery', array($this, 'property_gallery_shortcode'));
         add_action('pre_get_posts', array($this, 'filter_property_search_query'));
 
         // add_shortcode('custom_hello', array($this, 'hello_shortcode'));
@@ -493,24 +495,504 @@ class Shortcode
         // 3. Render using Template Engine (Separation of Concerns)
         return Template::get('frontend/hello-message', $data);
     }
-    
-    public function shortcode_property_price() {
+
+    public function shortcode_property_price()
+    {
         global $post;
-    
+
         ob_start();
-    
+
         if (!$post) {
             return '';
         }
-    
+
         $price = get_post_meta($post->ID, 'property_price', true);
-    
+
         if (!empty($price)) {
             echo 'Rp ' . number_format((float) $price, 0, ',', '.');
         } else {
             echo 'Hubungi Kami';
         }
-    
+
+        return ob_get_clean();
+    }
+
+    public function property_gallery_shortcode($atts)
+    {
+        global $post;
+
+        $atts = shortcode_atts(
+            array(
+                'id'    => 0,
+                'limit' => 3,
+            ),
+            $atts,
+            'property_gallery'
+        );
+
+        $post_id = absint($atts['id']);
+
+        if (!$post_id && $post instanceof \WP_Post) {
+            $post_id = (int) $post->ID;
+        }
+
+        if (!$post_id) {
+            return '';
+        }
+
+        $gallery_ids = $this->get_property_gallery_ids($post_id);
+
+        if (empty($gallery_ids)) {
+            return '';
+        }
+
+        $limit = max(1, min(3, absint($atts['limit']) ?: 3));
+        $items = array();
+
+        foreach ($gallery_ids as $attachment_id) {
+            $full = wp_get_attachment_image_url($attachment_id, 'full');
+            $large = wp_get_attachment_image_url($attachment_id, 'large');
+
+            if (!$full || !$large) {
+                continue;
+            }
+
+            $items[] = array(
+                'attachment_id' => $attachment_id,
+                'full_url'      => $full,
+                'preview_url'   => $large,
+                'thumbnail_url' => wp_get_attachment_image_url($attachment_id, 'thumbnail') ?: $large,
+                'alt'           => get_post_meta($attachment_id, '_wp_attachment_image_alt', true) ?: get_the_title($post_id),
+                'caption'       => wp_get_attachment_caption($attachment_id),
+            );
+        }
+
+        if (empty($items)) {
+            return '';
+        }
+
+        $preview_items = array_slice($items, 0, $limit);
+        $gallery_id = wp_unique_id('custom-property-gallery-');
+        $output = '';
+
+        if (!self::$property_gallery_assets_printed) {
+            $output .= $this->get_property_gallery_assets();
+            self::$property_gallery_assets_printed = true;
+        }
+
+        $output .= Template::get('frontend/property-gallery', array(
+            'gallery_id'     => $gallery_id,
+            'post_id'        => $post_id,
+            'post_title'     => get_the_title($post_id),
+            'items'          => $items,
+            'preview_items'  => $preview_items,
+            'total_images'   => count($items),
+        ));
+
+        return $output;
+    }
+
+    private function get_property_gallery_ids($post_id)
+    {
+        $gallery = get_post_meta($post_id, 'property_gallery', false);
+
+        if (!is_array($gallery)) {
+            $gallery = array();
+        }
+
+        $gallery = array_values(array_filter(array_map('absint', $gallery)));
+
+        if (empty($gallery) && has_post_thumbnail($post_id)) {
+            $gallery[] = get_post_thumbnail_id($post_id);
+        }
+
+        return array_values(array_unique($gallery));
+    }
+
+    private function get_property_gallery_assets()
+    {
+        ob_start();
+?>
+        <style>
+            .custom-property-gallery {
+                display: grid;
+                grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+                gap: 16px;
+                margin: 24px 0;
+            }
+
+            .custom-property-gallery__primary,
+            .custom-property-gallery__secondary {
+                min-width: 0;
+            }
+
+            .custom-property-gallery__secondary {
+                display: grid;
+                gap: 16px;
+            }
+
+            .custom-property-gallery__card {
+                position: relative;
+                display: block;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+                border: 0;
+                border-radius: 18px;
+                padding: 0;
+                cursor: pointer;
+                background: #e9e1d4;
+                box-shadow: 0 14px 40px rgba(17, 24, 39, 0.14);
+            }
+
+            .custom-property-gallery__card img {
+                display: block;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transition: transform 0.35s ease;
+            }
+
+            .custom-property-gallery__card:hover img,
+            .custom-property-gallery__card:focus-visible img {
+                transform: scale(1.04);
+            }
+
+            .custom-property-gallery__primary .custom-property-gallery__card {
+                aspect-ratio: 16 / 10;
+            }
+
+            .custom-property-gallery__secondary .custom-property-gallery__card {
+                aspect-ratio: 16 / 7.65;
+            }
+
+            .custom-property-gallery__overlay {
+                position: absolute;
+                inset: auto 16px 16px auto;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                border-radius: 999px;
+                padding: 12px 16px;
+                background: rgba(15, 23, 42, 0.72);
+                color: #fff;
+                font-size: 15px;
+                font-weight: 600;
+                backdrop-filter: blur(8px);
+            }
+
+            .custom-property-gallery__count {
+                position: absolute;
+                top: 16px;
+                right: 16px;
+                border-radius: 999px;
+                padding: 8px 12px;
+                background: rgba(255, 255, 255, 0.92);
+                color: #111827;
+                font-size: 13px;
+                font-weight: 700;
+            }
+
+            .custom-property-gallery__modal[hidden] {
+                display: none !important;
+            }
+
+            .custom-property-gallery__modal {
+                position: fixed;
+                inset: 0;
+                z-index: 9999;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+                background: rgba(2, 6, 23, 0.86);
+            }
+
+            .custom-property-gallery__dialog {
+                position: relative;
+                width: min(1100px, 100%);
+                max-height: min(92vh, 900px);
+                overflow: hidden;
+                border-radius: 24px;
+                background: #0f172a;
+                color: #fff;
+                box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+            }
+
+            .custom-property-gallery__viewport {
+                position: relative;
+                background: #020617;
+            }
+
+            .custom-property-gallery__viewport img {
+                display: block;
+                width: 100%;
+                max-height: 72vh;
+                object-fit: contain;
+                background: #020617;
+            }
+
+            .custom-property-gallery__toolbar {
+                position: absolute;
+                top: 16px;
+                right: 16px;
+                left: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                pointer-events: none;
+            }
+
+            .custom-property-gallery__toolbar>* {
+                pointer-events: auto;
+            }
+
+            .custom-property-gallery__index,
+            .custom-property-gallery__close,
+            .custom-property-gallery__nav {
+                border: 0;
+                border-radius: 999px;
+                background: rgba(15, 23, 42, 0.82);
+                color: #fff;
+            }
+
+            .custom-property-gallery__index {
+                padding: 10px 14px;
+                font-size: 14px;
+                font-weight: 600;
+            }
+
+            .custom-property-gallery__close,
+            .custom-property-gallery__nav {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 44px;
+                height: 44px;
+                cursor: pointer;
+                font-size: 22px;
+                line-height: 1;
+            }
+
+            .custom-property-gallery__nav {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+
+            .custom-property-gallery__nav--prev {
+                left: 16px;
+            }
+
+            .custom-property-gallery__nav--next {
+                right: 16px;
+            }
+
+            .custom-property-gallery__meta {
+                padding: 18px 20px 10px;
+            }
+
+            .custom-property-gallery__title {
+                margin: 0;
+                font-size: 20px;
+                font-weight: 700;
+                color: #fff;
+            }
+
+            .custom-property-gallery__caption {
+                margin: 8px 0 0;
+                font-size: 14px;
+                color: rgba(255, 255, 255, 0.78);
+            }
+
+            .custom-property-gallery__thumbs {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(82px, 1fr));
+                gap: 10px;
+                padding: 0 20px 20px;
+            }
+
+            .custom-property-gallery__thumb {
+                border: 2px solid transparent;
+                border-radius: 14px;
+                padding: 0;
+                overflow: hidden;
+                cursor: pointer;
+                background: transparent;
+                opacity: 0.72;
+            }
+
+            .custom-property-gallery__thumb.is-active {
+                border-color: #f59e0b;
+                opacity: 1;
+            }
+
+            .custom-property-gallery__thumb img {
+                display: block;
+                width: 100%;
+                aspect-ratio: 1 / 1;
+                object-fit: cover;
+            }
+
+            @media (max-width: 767px) {
+                .custom-property-gallery {
+                    grid-template-columns: 1fr;
+                }
+
+                .custom-property-gallery__secondary {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
+
+                .custom-property-gallery__overlay {
+                    inset: auto 12px 12px auto;
+                    padding: 10px 14px;
+                    font-size: 14px;
+                }
+
+                .custom-property-gallery__dialog {
+                    border-radius: 18px;
+                }
+
+                .custom-property-gallery__viewport img {
+                    max-height: 54vh;
+                }
+
+                .custom-property-gallery__nav {
+                    width: 40px;
+                    height: 40px;
+                }
+            }
+        </style>
+        <script>
+            (function() {
+                if (window.customPropertyGalleryInit) {
+                    return;
+                }
+
+                window.customPropertyGalleryInit = true;
+
+                document.addEventListener('click', function(event) {
+                    var trigger = event.target.closest('[data-property-gallery-trigger]');
+                    var modal = event.target.closest('[data-property-gallery-modal]');
+                    var closeButton = event.target.closest('[data-property-gallery-close]');
+                    var navButton = event.target.closest('[data-property-gallery-nav]');
+                    var thumbButton = event.target.closest('[data-property-gallery-thumb]');
+
+                    if (trigger) {
+                        event.preventDefault();
+                        openGallery(trigger.getAttribute('data-property-gallery-target'), parseInt(trigger.getAttribute('data-index'), 10) || 0);
+                        return;
+                    }
+
+                    if (thumbButton) {
+                        event.preventDefault();
+                        updateGallery(modal, parseInt(thumbButton.getAttribute('data-index'), 10) || 0);
+                        return;
+                    }
+
+                    if (navButton && modal) {
+                        event.preventDefault();
+                        navigateGallery(modal, navButton.getAttribute('data-property-gallery-nav') === 'next' ? 1 : -1);
+                        return;
+                    }
+
+                    if (closeButton && modal) {
+                        event.preventDefault();
+                        closeGallery(modal);
+                        return;
+                    }
+
+                    if (modal && event.target === modal) {
+                        closeGallery(modal);
+                    }
+                });
+
+                document.addEventListener('keydown', function(event) {
+                    var modal = document.querySelector('.custom-property-gallery__modal:not([hidden])');
+
+                    if (!modal) {
+                        return;
+                    }
+
+                    if (event.key === 'Escape') {
+                        closeGallery(modal);
+                    } else if (event.key === 'ArrowRight') {
+                        navigateGallery(modal, 1);
+                    } else if (event.key === 'ArrowLeft') {
+                        navigateGallery(modal, -1);
+                    }
+                });
+
+                function openGallery(targetId, index) {
+                    var modal = document.getElementById(targetId);
+
+                    if (!modal) {
+                        return;
+                    }
+
+                    modal.hidden = false;
+                    document.body.style.overflow = 'hidden';
+                    updateGallery(modal, index);
+                }
+
+                function closeGallery(modal) {
+                    modal.hidden = true;
+                    document.body.style.overflow = '';
+                }
+
+                function navigateGallery(modal, direction) {
+                    var items = getItems(modal);
+                    var current = parseInt(modal.getAttribute('data-current-index'), 10) || 0;
+                    var next = (current + direction + items.length) % items.length;
+                    updateGallery(modal, next);
+                }
+
+                function updateGallery(modal, index) {
+                    var items = getItems(modal);
+                    var item = items[index];
+
+                    if (!item) {
+                        return;
+                    }
+
+                    modal.setAttribute('data-current-index', index);
+
+                    var image = modal.querySelector('[data-property-gallery-image]');
+                    var caption = modal.querySelector('[data-property-gallery-caption]');
+                    var counter = modal.querySelector('[data-property-gallery-counter]');
+                    var thumbs = modal.querySelectorAll('[data-property-gallery-thumb]');
+
+                    if (image) {
+                        image.src = item.fullUrl;
+                        image.alt = item.alt || '';
+                    }
+
+                    if (caption) {
+                        caption.textContent = item.caption || '';
+                        caption.hidden = !item.caption;
+                    }
+
+                    if (counter) {
+                        counter.textContent = (index + 1) + ' / ' + items.length;
+                    }
+
+                    thumbs.forEach(function(thumb, thumbIndex) {
+                        thumb.classList.toggle('is-active', thumbIndex === index);
+                    });
+                }
+
+                function getItems(modal) {
+                    try {
+                        return JSON.parse(modal.getAttribute('data-items') || '[]');
+                    } catch (error) {
+                        return [];
+                    }
+                }
+            }());
+        </script>
+<?php
+
         return ob_get_clean();
     }
 }
