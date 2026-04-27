@@ -194,6 +194,8 @@ class Shortcode
 
     public function compare_shortcode($atts)
     {
+        global $post;
+
         $atts = shortcode_atts(
             array(),
             $atts,
@@ -208,28 +210,26 @@ class Shortcode
             'order'          => 'ASC',
         ));
 
-        $first_id = isset($_GET['compare_property_1']) ? absint(wp_unslash($_GET['compare_property_1'])) : 0;
-        $second_id = isset($_GET['compare_property_2']) ? absint(wp_unslash($_GET['compare_property_2'])) : 0;
+        $current_property_id = 0;
 
-        if (!$this->is_valid_property($first_id)) {
-            $first_id = 0;
+        if ($post instanceof \WP_Post && get_post_type($post) === 'property' && get_post_status($post) === 'publish') {
+            $current_property_id = (int) $post->ID;
         }
 
-        if (!$this->is_valid_property($second_id)) {
-            $second_id = 0;
-        }
-
+        $compare_inputs = $this->get_compare_property_inputs($current_property_id);
+        $selected_ids = $this->get_compare_property_ids($compare_inputs);
         $compare_rows = array();
 
-        if ($first_id && $second_id) {
-            $compare_rows = $this->get_compare_rows($first_id, $second_id);
+        if (count($selected_ids) >= 2) {
+            $compare_rows = $this->get_compare_rows($selected_ids);
         }
 
         return Template::get('frontend/property-compare', array(
-            'properties'   => $properties,
-            'first_id'     => $first_id,
-            'second_id'    => $second_id,
-            'compare_rows' => $compare_rows,
+            'properties'           => $properties,
+            'selected_ids'         => $selected_ids,
+            'compare_inputs'       => $compare_inputs,
+            'current_property_id'  => $current_property_id,
+            'compare_rows'         => $compare_rows,
         ));
     }
 
@@ -242,112 +242,130 @@ class Shortcode
         return get_post_type($post_id) === 'property' && get_post_status($post_id) === 'publish';
     }
 
-    private function get_compare_rows($first_id, $second_id)
+    private function get_compare_property_inputs($current_property_id = 0)
     {
-        $rows = array(
-            array(
-                'label'  => 'Gambar',
-                'first'  => $this->get_property_thumbnail($first_id),
-                'second' => $this->get_property_thumbnail($second_id),
-            ),
-            array(
-                'label'  => 'Tipe Properti',
-                'first'  => $this->get_terms_text($first_id, 'property_type'),
-                'second' => $this->get_terms_text($second_id, 'property_type'),
-            ),
-            array(
-                'label'  => 'Lokasi',
-                'first'  => $this->get_terms_text($first_id, 'location'),
-                'second' => $this->get_terms_text($second_id, 'location'),
-            ),
-            array(
-                'label'  => 'Proyek',
-                'first'  => $this->get_terms_text($first_id, 'property_project'),
-                'second' => $this->get_terms_text($second_id, 'property_project'),
-            ),
-            array(
-                'label'  => 'Harga',
-                'first'  => $this->format_price($this->get_meta($first_id, 'property_price')),
-                'second' => $this->format_price($this->get_meta($second_id, 'property_price')),
-            ),
-            array(
-                'label'  => 'Catatan Harga',
-                'first'  => $this->get_meta_text($first_id, 'property_price_note'),
-                'second' => $this->get_meta_text($second_id, 'property_price_note'),
-            ),
-            array(
-                'label'  => 'Tipe Transaksi',
-                'first'  => $this->get_mapped_meta($first_id, 'property_transaction_type', $this->transaction_type_options()),
-                'second' => $this->get_mapped_meta($second_id, 'property_transaction_type', $this->transaction_type_options()),
-            ),
-            array(
-                'label'  => 'Status Listing',
-                'first'  => $this->get_mapped_meta($first_id, 'property_listing_status', $this->listing_status_options()),
-                'second' => $this->get_mapped_meta($second_id, 'property_listing_status', $this->listing_status_options()),
-            ),
-            array(
-                'label'  => 'Kamar Tidur',
-                'first'  => $this->get_meta_text($first_id, 'property_bedrooms'),
-                'second' => $this->get_meta_text($second_id, 'property_bedrooms'),
-            ),
-            array(
-                'label'  => 'Kamar Mandi',
-                'first'  => $this->get_meta_text($first_id, 'property_bathrooms'),
-                'second' => $this->get_meta_text($second_id, 'property_bathrooms'),
-            ),
-            array(
-                'label'  => 'Garasi / Carport',
-                'first'  => $this->get_meta_text($first_id, 'property_garage'),
-                'second' => $this->get_meta_text($second_id, 'property_garage'),
-            ),
-            array(
-                'label'  => 'Luas Bangunan',
-                'first'  => $this->format_area($this->get_meta($first_id, 'property_building_area')),
-                'second' => $this->format_area($this->get_meta($second_id, 'property_building_area')),
-            ),
-            array(
-                'label'  => 'Luas Tanah',
-                'first'  => $this->format_area($this->get_meta($first_id, 'property_land_area')),
-                'second' => $this->format_area($this->get_meta($second_id, 'property_land_area')),
-            ),
-            array(
-                'label'  => 'Jumlah Lantai',
-                'first'  => $this->get_meta_text($first_id, 'property_floors'),
-                'second' => $this->get_meta_text($second_id, 'property_floors'),
-            ),
-            array(
-                'label'  => 'Sertifikat',
-                'first'  => $this->get_mapped_meta($first_id, 'property_certificate', $this->certificate_options()),
-                'second' => $this->get_mapped_meta($second_id, 'property_certificate', $this->certificate_options()),
-            ),
-            array(
-                'label'  => 'Kondisi Furnitur',
-                'first'  => $this->get_mapped_meta($first_id, 'property_furnishing', $this->furnishing_options()),
-                'second' => $this->get_mapped_meta($second_id, 'property_furnishing', $this->furnishing_options()),
-            ),
-            array(
-                'label'  => 'Alamat',
-                'first'  => $this->get_meta_text($first_id, 'property_address'),
-                'second' => $this->get_meta_text($second_id, 'property_address'),
-            ),
-            array(
-                'label'  => 'Kota',
-                'first'  => $this->get_meta_text($first_id, 'property_city'),
-                'second' => $this->get_meta_text($second_id, 'property_city'),
-            ),
-            array(
-                'label'  => 'Provinsi',
-                'first'  => $this->get_meta_text($first_id, 'property_province'),
-                'second' => $this->get_meta_text($second_id, 'property_province'),
-            ),
-            array(
-                'label'  => 'Galeri Foto',
-                'first'  => $this->format_gallery_count($first_id),
-                'second' => $this->format_gallery_count($second_id),
-            ),
+        $inputs = array(
+            1 => 0,
+            2 => 0,
+            3 => 0,
         );
 
-        return apply_filters('custom_plugin_property_compare_rows', $rows, $first_id, $second_id);
+        if ($current_property_id && $this->is_valid_property($current_property_id)) {
+            $inputs[1] = $current_property_id;
+        }
+
+        for ($i = 1; $i <= 3; $i++) {
+            if ($current_property_id && 1 === $i) {
+                continue;
+            }
+
+            $key = 'compare_property_' . $i;
+            $property_id = isset($_GET[$key]) ? absint(wp_unslash($_GET[$key])) : 0;
+
+            if (!$property_id || !$this->is_valid_property($property_id)) {
+                continue;
+            }
+
+            $inputs[$i] = $property_id;
+        }
+
+        return $inputs;
+    }
+
+    private function get_compare_property_ids($inputs)
+    {
+        if (!is_array($inputs)) {
+            return array();
+        }
+
+        return array_values(array_unique(array_filter(array_map('absint', $inputs))));
+    }
+
+    private function get_compare_rows($selected_ids)
+    {
+        $rows = array();
+
+        if (empty($selected_ids)) {
+            return $rows;
+        }
+
+        $definitions = array(
+            'Gambar' => function ($post_id) {
+                return $this->get_property_thumbnail($post_id);
+            },
+            'Tipe Properti' => function ($post_id) {
+                return $this->get_terms_text($post_id, 'property_type');
+            },
+            'Lokasi' => function ($post_id) {
+                return $this->get_terms_text($post_id, 'location');
+            },
+            'Proyek' => function ($post_id) {
+                return $this->get_terms_text($post_id, 'property_project');
+            },
+            'Harga' => function ($post_id) {
+                return $this->format_price($this->get_meta($post_id, 'property_price'));
+            },
+            'Catatan Harga' => function ($post_id) {
+                return $this->get_meta_text($post_id, 'property_price_note');
+            },
+            'Tipe Transaksi' => function ($post_id) {
+                return $this->get_mapped_meta($post_id, 'property_transaction_type', $this->transaction_type_options());
+            },
+            'Status Listing' => function ($post_id) {
+                return $this->get_mapped_meta($post_id, 'property_listing_status', $this->listing_status_options());
+            },
+            'Kamar Tidur' => function ($post_id) {
+                return $this->get_meta_text($post_id, 'property_bedrooms');
+            },
+            'Kamar Mandi' => function ($post_id) {
+                return $this->get_meta_text($post_id, 'property_bathrooms');
+            },
+            'Garasi / Carport' => function ($post_id) {
+                return $this->get_meta_text($post_id, 'property_garage');
+            },
+            'Luas Bangunan' => function ($post_id) {
+                return $this->format_area($this->get_meta($post_id, 'property_building_area'));
+            },
+            'Luas Tanah' => function ($post_id) {
+                return $this->format_area($this->get_meta($post_id, 'property_land_area'));
+            },
+            'Jumlah Lantai' => function ($post_id) {
+                return $this->get_meta_text($post_id, 'property_floors');
+            },
+            'Sertifikat' => function ($post_id) {
+                return $this->get_mapped_meta($post_id, 'property_certificate', $this->certificate_options());
+            },
+            'Kondisi Furnitur' => function ($post_id) {
+                return $this->get_mapped_meta($post_id, 'property_furnishing', $this->furnishing_options());
+            },
+            'Alamat' => function ($post_id) {
+                return $this->get_meta_text($post_id, 'property_address');
+            },
+            'Kota' => function ($post_id) {
+                return $this->get_meta_text($post_id, 'property_city');
+            },
+            'Provinsi' => function ($post_id) {
+                return $this->get_meta_text($post_id, 'property_province');
+            },
+            'Galeri Foto' => function ($post_id) {
+                return $this->format_gallery_count($post_id);
+            },
+        );
+
+        foreach ($definitions as $label => $callback) {
+            $values = array();
+
+            foreach ($selected_ids as $post_id) {
+                $values[] = call_user_func($callback, $post_id);
+            }
+
+            $rows[] = array(
+                'label'  => $label,
+                'values' => $values,
+            );
+        }
+
+        return apply_filters('custom_plugin_property_compare_rows', $rows, $selected_ids);
     }
 
     private function get_property_thumbnail($post_id)
