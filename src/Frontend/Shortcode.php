@@ -17,6 +17,7 @@ class Shortcode
 {
     private static $property_gallery_assets_printed = false;
     private static $mortgage_assets_printed = false;
+    private static $property_specification_assets_printed = false;
 
     public function __construct()
     {
@@ -24,6 +25,8 @@ class Shortcode
         add_shortcode('property_search', array($this, 'property_search_shortcode'));
         add_shortcode('search', array($this, 'search_shortcode'));
         add_shortcode('property_price', array($this, 'shortcode_property_price'));
+        add_shortcode('property_specifications', array($this, 'property_specifications_shortcode'));
+        add_shortcode('property_location_map', array($this, 'property_location_map_shortcode'));
         add_shortcode('property_gallery', array($this, 'property_gallery_shortcode'));
         add_shortcode('simulasi_kpr', array($this, 'mortgage_simulation_shortcode'));
         add_action('pre_get_posts', array($this, 'filter_property_search_query'));
@@ -535,6 +538,116 @@ class Shortcode
         }
 
         return ob_get_clean();
+    }
+
+    public function property_specifications_shortcode($atts)
+    {
+        global $post;
+
+        $atts = shortcode_atts(
+            array(
+                'id'    => 0,
+                'title' => 'Spesifikasi Properti',
+            ),
+            $atts,
+            'property_specifications'
+        );
+
+        $post_id = absint($atts['id']);
+
+        if (!$post_id && $post instanceof \WP_Post) {
+            $post_id = (int) $post->ID;
+        }
+
+        if (!$post_id || get_post_type($post_id) !== 'property') {
+            return '';
+        }
+
+        $items = $this->get_property_specification_items($post_id);
+
+        if (empty($items)) {
+            return '';
+        }
+
+        $output = '';
+
+        if (!self::$property_specification_assets_printed) {
+            $output .= $this->get_property_specifications_assets();
+            self::$property_specification_assets_printed = true;
+        }
+
+        $output .= '<section class="custom-property-specifications" aria-label="' . esc_attr($atts['title']) . '">';
+        $output .= '<h3 class="custom-property-specifications__title">' . esc_html($atts['title']) . '</h3>';
+        $output .= '<div class="custom-property-specifications__grid">';
+
+        foreach ($items as $item) {
+            $output .= '<div class="custom-property-specifications__item">';
+            $output .= '<span class="custom-property-specifications__icon" aria-hidden="true">' . $item['icon'] . '</span>';
+            $output .= '<div class="custom-property-specifications__content">';
+            $output .= '<span class="custom-property-specifications__label">' . esc_html($item['label']) . '</span>';
+            $output .= '<strong class="custom-property-specifications__value">' . esc_html($item['value']) . '</strong>';
+            $output .= '</div>';
+            $output .= '</div>';
+        }
+
+        $output .= '</div>';
+        $output .= '</section>';
+
+        return $output;
+    }
+
+    public function property_location_map_shortcode($atts)
+    {
+        global $post;
+
+        $atts = shortcode_atts(
+            array(
+                'id'     => 0,
+                'height' => '420',
+                'zoom'   => '15',
+            ),
+            $atts,
+            'property_location_map'
+        );
+
+        $post_id = absint($atts['id']);
+
+        if (!$post_id && $post instanceof \WP_Post) {
+            $post_id = (int) $post->ID;
+        }
+
+        if (!$post_id || get_post_type($post_id) !== 'property') {
+            return '';
+        }
+
+        $latitude = get_post_meta($post_id, 'property_latitude', true);
+        $longitude = get_post_meta($post_id, 'property_longitude', true);
+
+        if ($latitude === '' || $longitude === '' || !is_numeric($latitude) || !is_numeric($longitude)) {
+            return '';
+        }
+
+        $latitude = (float) $latitude;
+        $longitude = (float) $longitude;
+        $height = max(240, absint($atts['height']));
+        $zoom = max(1, min(20, absint($atts['zoom'])));
+        $title = get_the_title($post_id);
+        $iframe_src = add_query_arg(
+            array(
+                'q'      => $latitude . ',' . $longitude,
+                'z'      => $zoom,
+                'hl'     => 'id',
+                'output' => 'embed',
+            ),
+            'https://maps.google.com/maps'
+        );
+
+        return sprintf(
+            '<div class="custom-property-location-map"><iframe src="%1$s" width="100%%" height="%2$d" style="border:0;" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade" title="%3$s"></iframe></div>',
+            esc_url($iframe_src),
+            $height,
+            esc_attr(sprintf('Peta lokasi %s', $title))
+        );
     }
 
     public function mortgage_simulation_shortcode($atts)
@@ -1219,6 +1332,190 @@ class Shortcode
             }());
         </script>
         <?php
+
+        return ob_get_clean();
+    }
+
+    private function get_property_specification_items($post_id)
+    {
+        $certificate = $this->get_mapped_meta($post_id, 'property_certificate', $this->certificate_options());
+        $furnishing = $this->get_mapped_meta($post_id, 'property_furnishing', $this->furnishing_options());
+
+        $definitions = array(
+            array(
+                'label' => 'Kamar Tidur',
+                'value' => $this->format_spec_number($this->get_meta($post_id, 'property_bedrooms'), 'KT'),
+                'icon'  => $this->get_specification_icon('bedroom'),
+            ),
+            array(
+                'label' => 'Kamar Mandi',
+                'value' => $this->format_spec_number($this->get_meta($post_id, 'property_bathrooms'), 'KM'),
+                'icon'  => $this->get_specification_icon('bathroom'),
+            ),
+            array(
+                'label' => 'Garasi / Carport',
+                'value' => $this->format_spec_number($this->get_meta($post_id, 'property_garage'), 'Mobil'),
+                'icon'  => $this->get_specification_icon('garage'),
+            ),
+            array(
+                'label' => 'Luas Bangunan',
+                'value' => $this->format_area($this->get_meta($post_id, 'property_building_area')),
+                'icon'  => $this->get_specification_icon('building'),
+            ),
+            array(
+                'label' => 'Luas Tanah',
+                'value' => $this->format_area($this->get_meta($post_id, 'property_land_area')),
+                'icon'  => $this->get_specification_icon('land'),
+            ),
+            array(
+                'label' => 'Jumlah Lantai',
+                'value' => $this->format_spec_number($this->get_meta($post_id, 'property_floors'), 'Lantai'),
+                'icon'  => $this->get_specification_icon('floors'),
+            ),
+            array(
+                'label' => 'Sertifikat',
+                'value' => $certificate,
+                'icon'  => $this->get_specification_icon('certificate'),
+            ),
+            array(
+                'label' => 'Kondisi Furnitur',
+                'value' => $furnishing,
+                'icon'  => $this->get_specification_icon('furnishing'),
+            ),
+        );
+
+        return array_values(array_filter($definitions, function ($item) {
+            return isset($item['value']) && $item['value'] !== '-';
+        }));
+    }
+
+    private function format_spec_number($value, $suffix = '')
+    {
+        if ($value === '' || !is_numeric($value)) {
+            return '-';
+        }
+
+        $formatted = number_format((float) $value, 0, ',', '.');
+
+        if ($suffix === '') {
+            return $formatted;
+        }
+
+        return $formatted . ' ' . $suffix;
+    }
+
+    private function get_specification_icon($type)
+    {
+        $icons = array(
+            'bedroom' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11V7a2 2 0 0 1 2-2h4a3 3 0 0 1 3 3v3"/><path d="M14 11V9a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v2"/><path d="M2 11h20v5H2z"/><path d="M4 16v3"/><path d="M20 16v3"/></svg>',
+            'bathroom' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v7"/><path d="M7 7h4a2 2 0 1 0 0-4"/><path d="M4 13h16"/><path d="M6 13v2a6 6 0 0 0 12 0v-2"/><path d="M9 19v1"/><path d="M15 19v1"/></svg>',
+            'garage' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l2-5h14l2 5"/><path d="M5 11h14v6a1 1 0 0 1-1 1h-1"/><path d="M7 18H6a1 1 0 0 1-1-1v-6"/><path d="M7 18h10"/><path d="M8 14h.01"/><path d="M16 14h.01"/><circle cx="7.5" cy="18" r="1.5"/><circle cx="16.5" cy="18" r="1.5"/></svg>',
+            'building' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v14"/><path d="M16 10h2a2 2 0 0 1 2 2v8"/><path d="M8 8h4"/><path d="M8 12h4"/><path d="M8 16h4"/><path d="M10 20v-2"/></svg>',
+            'land' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v12H4z"/><path d="M4 10h16"/><path d="M8 6v12"/><path d="M14 6v12"/><path d="M4 18l6-6 4 4 6-6"/></svg>',
+            'floors' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19h14"/><path d="M7 19V8l5-3 5 3v11"/><path d="M9 11h.01"/><path d="M12 11h.01"/><path d="M15 11h.01"/><path d="M9 14h.01"/><path d="M12 14h.01"/><path d="M15 14h.01"/></svg>',
+            'certificate' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v5h5"/><path d="M10 13h6"/><path d="M10 17h4"/></svg>',
+            'furnishing' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v4H4z"/><path d="M7 9V7a2 2 0 0 1 2-2h1"/><path d="M14 9V7a2 2 0 0 0-2-2h-1"/><path d="M6 16v3"/><path d="M18 16v3"/></svg>',
+        );
+
+        return isset($icons[$type]) ? $icons[$type] : $icons['building'];
+    }
+
+    private function get_property_specifications_assets()
+    {
+        ob_start();
+?>
+        <style>
+            .custom-property-specifications {
+                margin: 28px 0;
+                padding: 28px;
+                border-radius: 24px;
+                background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+                box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+            }
+
+            .custom-property-specifications__title {
+                margin: 0 0 22px;
+                color: #0f172a;
+                font-size: 32px;
+                font-weight: 700;
+                line-height: 1.1;
+            }
+
+            .custom-property-specifications__grid {
+                display: grid;
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                gap: 20px 24px;
+            }
+
+            .custom-property-specifications__item {
+                display: flex;
+                align-items: flex-start;
+                gap: 14px;
+                min-width: 0;
+            }
+
+            .custom-property-specifications__icon {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 44px;
+                height: 44px;
+                flex: 0 0 44px;
+                border-radius: 14px;
+                background: #fff;
+                color: #334155;
+                box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.26);
+            }
+
+            .custom-property-specifications__icon svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .custom-property-specifications__content {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                min-width: 0;
+            }
+
+            .custom-property-specifications__label {
+                color: #475569;
+                font-size: 14px;
+                line-height: 1.45;
+            }
+
+            .custom-property-specifications__value {
+                color: #0f172a;
+                font-size: 17px;
+                font-weight: 700;
+                line-height: 1.35;
+            }
+
+            @media (max-width: 1024px) {
+                .custom-property-specifications__grid {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
+            }
+
+            @media (max-width: 640px) {
+                .custom-property-specifications {
+                    padding: 22px 18px;
+                    border-radius: 20px;
+                }
+
+                .custom-property-specifications__title {
+                    margin-bottom: 18px;
+                    font-size: 26px;
+                }
+
+                .custom-property-specifications__grid {
+                    grid-template-columns: 1fr;
+                    gap: 16px;
+                }
+            }
+        </style>
+<?php
 
         return ob_get_clean();
     }
