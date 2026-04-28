@@ -846,7 +846,7 @@ class Shortcode
             .custom-kpr-simulator__panel {
                 position: relative;
                 padding: 28px 26px;
-                border-top: 6px solid #e32020;
+                border-top: 6px solid #0c4474;
             }
 
             .custom-kpr-simulator__summary {
@@ -943,7 +943,7 @@ class Shortcode
 
             .custom-kpr-simulator__slider {
                 width: 100%;
-                accent-color: #e32020;
+                accent-color: #0c4474;
             }
 
             .custom-kpr-simulator__scale {
@@ -958,7 +958,7 @@ class Shortcode
                 min-height: 50px;
                 border: 0;
                 border-radius: 8px;
-                background: #e32020;
+                background: #0c4474;
                 color: #fff;
                 font-size: 1rem;
                 font-weight: 700;
@@ -970,7 +970,7 @@ class Shortcode
                 margin: -18px 0 0 -18px;
                 padding: 10px 14px;
                 border-radius: 8px 8px 0 0;
-                background: #e32020;
+                background: #0c4474;
                 color: #fff;
                 font-size: 0.85rem;
                 font-weight: 700;
@@ -1004,7 +1004,7 @@ class Shortcode
                 margin-top: 22px;
                 padding: 18px;
                 border-radius: 12px;
-                background: #fff1f2;
+                background: #eaf2f9;
             }
 
             .custom-kpr-simulator__hero-title {
@@ -1039,7 +1039,7 @@ class Shortcode
                 justify-content: center;
                 padding: 12px 18px;
                 border-radius: 8px;
-                background: #e32020;
+                background: #0c4474;
                 color: #fff;
                 text-decoration: none;
                 font-weight: 700;
