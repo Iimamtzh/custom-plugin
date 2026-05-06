@@ -7,6 +7,7 @@ if (!defined('ABSPATH')) {
 $wa_link = !empty($wa_link) ? $wa_link : '#';
 $initial_values = isset($initial_values) && is_array($initial_values) ? $initial_values : array();
 $initial_result = isset($initial_result) && is_array($initial_result) ? $initial_result : array();
+$initial_price_value = !empty($initial_values['price']) ? (string) round($initial_values['price']) : '';
 ?>
 
 <div
@@ -28,7 +29,7 @@ $initial_result = isset($initial_result) && is_array($initial_result) ? $initial
                     <div></div>
                     <div class="custom-kpr-simulator__field">
                         <span class="custom-kpr-simulator__prefix">Rp</span>
-                        <input class="custom-kpr-simulator__input" id="<?php echo esc_attr($simulator_id); ?>-price" type="text" value="<?php echo esc_attr((string) round($initial_values['price'])); ?>" data-kpr-price inputmode="numeric">
+                        <input class="custom-kpr-simulator__input" id="<?php echo esc_attr($simulator_id); ?>-price" type="text" value="<?php echo esc_attr($initial_price_value); ?>" placeholder="<?php esc_attr_e('Masukkan harga properti', 'custom-plugin'); ?>" data-kpr-price inputmode="numeric">
                     </div>
                 </div>
             </div>

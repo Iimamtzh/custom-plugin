@@ -688,10 +688,6 @@ class Shortcode
         $loan_years = min(25, max($fixed_years, (int) $atts['loan_years']));
         $other_costs_pct = min(15, max(0, (float) $atts['other_costs_pct']));
 
-        if (!$price) {
-            return '';
-        }
-
         $down_payment_amount = $price * ($down_payment_pct / 100);
         $simulation = $this->calculate_mortgage_simulation(
             $price,
