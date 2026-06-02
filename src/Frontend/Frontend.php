@@ -19,10 +19,11 @@ class Frontend
         // Example: To activate frontend hooks, uncomment below.
         // add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
         add_filter('language_attributes', array($this, 'velocitytheme_color_scheme'));
-        
+        add_action('template_redirect', array($this, 'require_login_for_public_site'));
+
         // Filter with priority and number of arguments
         // add_filter('excerpt_length', array($this, 'custom_excerpt_length'), 999, 1);
-        
+
         // Trigger a custom action (so other devs can hook into your plugin)
         // do_action('custom_plugin_after_frontend_init', $this);
     }
@@ -34,6 +35,27 @@ class Frontend
     {
         $color_scheme = isset($_COOKIE["color_scheme"]) ? sanitize_text_field($_COOKIE["color_scheme"]) : 'light';
         return $output . ' data-bs-theme="' . esc_attr($color_scheme) . '"';
+    }
+
+    /**
+     * Blocks public frontend access for visitors who are not logged in.
+     */
+    public function require_login_for_public_site()
+    {
+        if (is_user_logged_in()) {
+            return;
+        }
+
+        if (is_admin() || wp_doing_ajax() || wp_doing_cron() || is_customize_preview()) {
+            return;
+        }
+
+        if (defined('REST_REQUEST') && REST_REQUEST) {
+            return;
+        }
+
+        wp_safe_redirect(wp_login_url(admin_url()));
+        exit;
     }
 
     /**
@@ -59,7 +81,7 @@ class Frontend
     public static function get_formatted_price($price)
     {
         $formatted = 'Rp ' . number_format($price, 0, ',', '.');
-        
+
         // Always provide a filter so others can modify your output
         return apply_filters('custom_plugin_format_price', $formatted, $price);
     }
