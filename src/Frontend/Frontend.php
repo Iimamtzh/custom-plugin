@@ -70,26 +70,32 @@ class Frontend
         $logo_url = $this->get_login_logo_url();
 ?>
         <style>
+            html {
+                background: #050505;
+            }
+
             body.login {
                 min-height: 100vh;
                 margin: 0;
-                padding: 110px 24px 32px;
+                padding: 128px 24px 48px;
                 display: flex;
-                align-items: center;
+                align-items: flex-start;
                 justify-content: center;
                 background:
-                    radial-gradient(circle at top, rgba(255, 255, 255, 0.08), transparent 32%),
-                    linear-gradient(180deg, #111111 0%, #000000 100%);
+                    radial-gradient(circle at top, rgba(255, 255, 255, 0.08), transparent 26%),
+                    linear-gradient(180deg, #101010 0%, #050505 100%);
                 color: #ffffff;
+                box-sizing: border-box;
             }
 
             body.login div#login {
                 width: min(100%, 420px);
-                padding: 36px 32px 28px;
-                background: rgba(8, 8, 8, 0.88);
-                border: 1px solid rgba(255, 255, 255, 0.1);
+                padding: 32px 32px 28px;
+                margin: 0 auto;
+                background: linear-gradient(180deg, rgba(10, 10, 10, 0.96) 0%, rgba(6, 6, 6, 0.96) 100%);
+                border: 1px solid rgba(255, 255, 255, 0.08);
                 border-radius: 24px;
-                box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+                box-shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
                 backdrop-filter: blur(12px);
             }
 
@@ -98,8 +104,8 @@ class Frontend
             }
 
             body.login h1 a {
-                width: 180px;
-                height: 90px;
+                width: 140px;
+                height: 86px;
                 margin: 0 auto;
                 background-size: contain;
                 background-position: center;
@@ -113,6 +119,12 @@ class Frontend
                 border: 1px solid rgba(255, 255, 255, 0.08);
                 border-radius: 18px;
                 box-shadow: none;
+            }
+
+            body.login #nav,
+            body.login #backtoblog {
+                margin: 18px 0 0;
+                padding: 0;
             }
 
             body.login label,
@@ -168,73 +180,93 @@ class Frontend
                 left: 0;
                 right: 0;
                 z-index: 9999;
-                padding: 18px 24px;
-                background: rgba(0, 0, 0, 0.72);
+                padding: 10px 20px;
+                background: rgba(3, 3, 3, 0.88);
                 border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
                 backdrop-filter: blur(12px);
             }
 
             .custom-plugin-login-topbar__inner {
                 max-width: 1180px;
+                min-height: 56px;
                 margin: 0 auto;
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                gap: 24px;
+                gap: 20px;
             }
 
             .custom-plugin-login-brand {
                 display: inline-flex;
                 align-items: center;
-                gap: 12px;
+                gap: 10px;
                 color: #ffffff;
                 text-decoration: none;
-                font-size: 18px;
+                font-size: 14px;
                 font-weight: 700;
+                line-height: 1.25;
+                max-width: min(100%, 760px);
             }
 
             .custom-plugin-login-brand img {
-                max-height: 42px;
-                width: auto;
+                width: 36px;
+                height: 36px;
+                object-fit: contain;
+                flex: 0 0 auto;
                 display: block;
+                border-radius: 50%;
             }
 
             .custom-plugin-login-nav,
             .custom-plugin-login-nav ul {
                 display: flex;
                 align-items: center;
-                gap: 18px;
+                justify-content: flex-end;
+                gap: 10px;
                 margin: 0;
                 padding: 0;
                 list-style: none;
             }
 
             .custom-plugin-login-nav a {
+                display: inline-flex;
+                align-items: center;
+                min-height: 38px;
+                padding: 0 16px;
+                border-radius: 999px;
                 color: rgba(255, 255, 255, 0.88);
                 text-decoration: none;
                 font-size: 14px;
                 font-weight: 500;
+                background: rgba(255, 255, 255, 0.03);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
             }
 
             .custom-plugin-login-nav a:hover,
             .custom-plugin-login-nav a:focus {
                 color: #ffffff;
+                background: rgba(255, 255, 255, 0.08);
+                border-color: rgba(255, 255, 255, 0.16);
             }
 
             @media (max-width: 782px) {
                 body.login {
-                    padding-top: 140px;
+                    padding: 124px 16px 32px;
                 }
 
                 .custom-plugin-login-topbar__inner {
                     flex-direction: column;
                     align-items: flex-start;
+                    justify-content: center;
                 }
 
                 .custom-plugin-login-nav,
                 .custom-plugin-login-nav ul {
                     flex-wrap: wrap;
-                    gap: 12px;
+                    justify-content: flex-start;
+                    gap: 8px;
                 }
 
                 body.login div#login {
@@ -243,6 +275,10 @@ class Frontend
 
                 body.login form {
                     padding: 22px 18px 18px;
+                }
+
+                .custom-plugin-login-brand {
+                    font-size: 13px;
                 }
             }
         </style>
