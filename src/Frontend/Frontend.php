@@ -390,10 +390,11 @@ class Frontend
             ),
         );
 
-        if (get_option('users_can_register')) {
+        $register_url = $this->get_register_page_url();
+        if (!empty($register_url)) {
             $links[] = array(
-                'label' => __('Daftar', 'custom-plugin'),
-                'url'   => wp_registration_url(),
+                'label' => __('Register', 'custom-plugin'),
+                'url'   => $register_url,
             );
         }
 
@@ -436,6 +437,34 @@ class Frontend
         $available_locations = array_keys(array_filter($locations));
 
         return !empty($available_locations) ? $available_locations[0] : '';
+    }
+
+    /**
+     * Resolves the registration page URL, preferring Ultimate Member when available.
+     *
+     * @return string
+     */
+    private function get_register_page_url()
+    {
+        if (function_exists('um_get_core_page')) {
+            $um_register_url = um_get_core_page('register');
+            if (!empty($um_register_url)) {
+                return $um_register_url;
+            }
+        }
+
+        if (function_exists('um_get_core_page_url')) {
+            $um_register_url = um_get_core_page_url('register');
+            if (!empty($um_register_url)) {
+                return $um_register_url;
+            }
+        }
+
+        if (get_option('users_can_register')) {
+            return wp_registration_url();
+        }
+
+        return home_url('/register/');
     }
 
     /**
