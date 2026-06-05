@@ -511,6 +511,10 @@ class Frontend
                 margin-top: 20px;
             }
 
+            .um-col-alt {
+                display: none !important;
+            }
+
             .custom-plugin-auth-register .um .um-left,
             .custom-plugin-auth-register .um .um-right {
                 float: none !important;
