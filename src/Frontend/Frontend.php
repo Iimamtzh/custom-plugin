@@ -22,6 +22,7 @@ class Frontend
         add_action('template_redirect', array($this, 'require_login_for_public_site'));
         add_action('login_enqueue_scripts', array($this, 'customize_login_screen'));
         add_action('login_header', array($this, 'render_login_topbar'));
+        add_action('login_footer', array($this, 'render_login_tabs_script'));
         add_filter('login_headerurl', array($this, 'get_login_header_url'));
         add_filter('login_headertext', array($this, 'get_login_header_text'));
 
@@ -89,7 +90,7 @@ class Frontend
             }
 
             body.login div#login {
-                width: min(100%, 420px);
+                width: min(100%, 560px);
                 padding: 32px 32px 28px;
                 margin: 0 auto;
                 background: linear-gradient(180deg, rgba(10, 10, 10, 0.96) 0%, rgba(6, 6, 6, 0.96) 100%);
@@ -143,7 +144,12 @@ class Frontend
             }
 
             body.login input[type="text"],
-            body.login input[type="password"] {
+            body.login input[type="password"],
+            body.login input[type="email"],
+            body.login input[type="tel"],
+            body.login input[type="number"],
+            body.login textarea,
+            body.login select {
                 background: rgba(255, 255, 255, 0.06);
                 border: 1px solid rgba(255, 255, 255, 0.14);
                 color: #ffffff;
@@ -152,7 +158,12 @@ class Frontend
             }
 
             body.login input[type="text"]:focus,
-            body.login input[type="password"]:focus {
+            body.login input[type="password"]:focus,
+            body.login input[type="email"]:focus,
+            body.login input[type="tel"]:focus,
+            body.login input[type="number"]:focus,
+            body.login textarea:focus,
+            body.login select:focus {
                 border-color: rgba(255, 255, 255, 0.35);
                 box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18);
             }
@@ -251,6 +262,130 @@ class Frontend
                 border-color: rgba(255, 255, 255, 0.16);
             }
 
+            .custom-plugin-auth-shell {
+                display: flex;
+                flex-direction: column;
+                gap: 24px;
+            }
+
+            .custom-plugin-auth-tabs {
+                display: inline-flex;
+                gap: 8px;
+                padding: 6px;
+                background: rgba(255, 255, 255, 0.04);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 999px;
+                align-self: center;
+            }
+
+            .custom-plugin-auth-tab {
+                min-height: 42px;
+                padding: 0 20px;
+                border: 0;
+                border-radius: 999px;
+                background: transparent;
+                color: rgba(255, 255, 255, 0.74);
+                font-size: 14px;
+                font-weight: 700;
+                cursor: pointer;
+                transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+            }
+
+            .custom-plugin-auth-tab.is-active {
+                background: #ffffff;
+                color: #050505;
+                box-shadow: 0 10px 30px rgba(255, 255, 255, 0.12);
+            }
+
+            .custom-plugin-auth-tab:hover {
+                color: #ffffff;
+            }
+
+            .custom-plugin-auth-panel {
+                display: none;
+            }
+
+            .custom-plugin-auth-panel.is-active {
+                display: block;
+            }
+
+            .custom-plugin-auth-login-content {
+                display: flex;
+                flex-direction: column;
+                gap: 18px;
+            }
+
+            .custom-plugin-auth-register {
+                padding: 26px 24px 24px;
+                background: rgba(255, 255, 255, 0.02);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 18px;
+            }
+
+            .custom-plugin-auth-register__intro {
+                margin: 0 0 18px;
+                color: rgba(255, 255, 255, 0.68);
+                font-size: 14px;
+                line-height: 1.6;
+                text-align: center;
+            }
+
+            .custom-plugin-auth-register .um {
+                color: #ffffff;
+            }
+
+            .custom-plugin-auth-register .um form {
+                padding: 0;
+                border: 0;
+                background: transparent;
+            }
+
+            .custom-plugin-auth-register .um .um-form {
+                margin: 0;
+            }
+
+            .custom-plugin-auth-register .um .um-field-label label,
+            .custom-plugin-auth-register .um .um-field-label {
+                color: rgba(255, 255, 255, 0.84);
+            }
+
+            .custom-plugin-auth-register .um input[type="submit"],
+            .custom-plugin-auth-register .um-button,
+            .custom-plugin-auth-register .um a.um-button {
+                min-height: 44px !important;
+                border: 0 !important;
+                border-radius: 999px !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+                box-shadow: none !important;
+                font-weight: 700 !important;
+            }
+
+            .custom-plugin-auth-register .um input[type="submit"]:hover,
+            .custom-plugin-auth-register .um-button:hover,
+            .custom-plugin-auth-register .um a.um-button:hover {
+                background: #e9e9e9 !important;
+            }
+
+            .custom-plugin-auth-register .um .um-link {
+                color: rgba(255, 255, 255, 0.76) !important;
+            }
+
+            .custom-plugin-auth-register .um .um-field-error,
+            .custom-plugin-auth-register .um .um-notice {
+                border-radius: 12px;
+            }
+
+            .custom-plugin-auth-fallback {
+                margin: 0;
+                padding: 16px 18px;
+                border-radius: 14px;
+                background: rgba(255, 255, 255, 0.04);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                color: rgba(255, 255, 255, 0.82);
+                text-align: center;
+            }
+
             @media (max-width: 782px) {
                 body.login {
                     padding: 124px 16px 32px;
@@ -274,6 +409,10 @@ class Frontend
                 }
 
                 body.login form {
+                    padding: 22px 18px 18px;
+                }
+
+                .custom-plugin-auth-register {
                     padding: 22px 18px 18px;
                 }
 
@@ -365,38 +504,12 @@ class Frontend
      */
     private function get_login_menu_markup()
     {
-        $menu_location = $this->get_login_menu_location();
-
-        if (!empty($menu_location)) {
-            $menu_markup = wp_nav_menu(array(
-                'theme_location' => $menu_location,
-                'container'      => 'nav',
-                'container_class' => 'custom-plugin-login-nav',
-                'menu_class'     => 'custom-plugin-login-nav__items',
-                'echo'           => false,
-                'fallback_cb'    => false,
-                'depth'          => 1,
-            ));
-
-            if (!empty($menu_markup)) {
-                return $menu_markup;
-            }
-        }
-
         $links = array(
             array(
                 'label' => __('Beranda', 'custom-plugin'),
                 'url'   => home_url('/'),
             ),
         );
-
-        $register_url = $this->get_register_page_url();
-        if (!empty($register_url)) {
-            $links[] = array(
-                'label' => __('Register', 'custom-plugin'),
-                'url'   => $register_url,
-            );
-        }
 
         $items = '';
         foreach ($links as $link) {
@@ -412,6 +525,110 @@ class Frontend
             esc_attr__('Login navigation', 'custom-plugin'),
             $items
         );
+    }
+
+    /**
+     * Adds login/register tabs to the WordPress login box.
+     *
+     * @return void
+     */
+    public function render_login_tabs_script()
+    {
+        $register_markup = $this->get_register_panel_markup();
+        ?>
+        <div id="custom-plugin-register-panel-template" style="display:none;">
+            <?php echo $register_markup; ?>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var loginRoot = document.getElementById('login');
+                if (!loginRoot || loginRoot.dataset.customPluginTabsReady === '1') {
+                    return;
+                }
+
+                var loginTitle = loginRoot.querySelector('h1');
+                var loginForm = loginRoot.querySelector('form');
+                var nav = loginRoot.querySelector('#nav');
+                var backToBlog = loginRoot.querySelector('#backtoblog');
+                var registerTemplate = document.getElementById('custom-plugin-register-panel-template');
+
+                if (!loginTitle || !loginForm || !registerTemplate) {
+                    return;
+                }
+
+                var shell = document.createElement('div');
+                shell.className = 'custom-plugin-auth-shell';
+
+                var tabs = document.createElement('div');
+                tabs.className = 'custom-plugin-auth-tabs';
+                tabs.setAttribute('role', 'tablist');
+                tabs.setAttribute('aria-label', 'Authentication tabs');
+
+                var loginTab = document.createElement('button');
+                loginTab.type = 'button';
+                loginTab.className = 'custom-plugin-auth-tab is-active';
+                loginTab.textContent = 'Login';
+                loginTab.setAttribute('role', 'tab');
+                loginTab.setAttribute('aria-selected', 'true');
+
+                var registerTab = document.createElement('button');
+                registerTab.type = 'button';
+                registerTab.className = 'custom-plugin-auth-tab';
+                registerTab.textContent = 'Register';
+                registerTab.setAttribute('role', 'tab');
+                registerTab.setAttribute('aria-selected', 'false');
+
+                tabs.appendChild(loginTab);
+                tabs.appendChild(registerTab);
+
+                var loginPanel = document.createElement('section');
+                loginPanel.className = 'custom-plugin-auth-panel is-active';
+                loginPanel.setAttribute('role', 'tabpanel');
+
+                var loginContent = document.createElement('div');
+                loginContent.className = 'custom-plugin-auth-login-content';
+                loginContent.appendChild(loginTitle);
+                loginContent.appendChild(loginForm);
+                if (nav) {
+                    loginContent.appendChild(nav);
+                }
+                if (backToBlog) {
+                    loginContent.appendChild(backToBlog);
+                }
+                loginPanel.appendChild(loginContent);
+
+                var registerPanel = document.createElement('section');
+                registerPanel.className = 'custom-plugin-auth-panel';
+                registerPanel.setAttribute('role', 'tabpanel');
+                registerPanel.innerHTML = registerTemplate.innerHTML;
+
+                shell.appendChild(tabs);
+                shell.appendChild(loginPanel);
+                shell.appendChild(registerPanel);
+
+                loginRoot.appendChild(shell);
+                loginRoot.dataset.customPluginTabsReady = '1';
+
+                function setActiveTab(tabName) {
+                    var loginIsActive = tabName === 'login';
+                    loginTab.classList.toggle('is-active', loginIsActive);
+                    registerTab.classList.toggle('is-active', !loginIsActive);
+                    loginTab.setAttribute('aria-selected', loginIsActive ? 'true' : 'false');
+                    registerTab.setAttribute('aria-selected', loginIsActive ? 'false' : 'true');
+                    loginPanel.classList.toggle('is-active', loginIsActive);
+                    registerPanel.classList.toggle('is-active', !loginIsActive);
+                }
+
+                loginTab.addEventListener('click', function () {
+                    setActiveTab('login');
+                });
+
+                registerTab.addEventListener('click', function () {
+                    setActiveTab('register');
+                });
+            });
+        </script>
+        <?php
     }
 
     /**
@@ -465,6 +682,29 @@ class Frontend
         }
 
         return home_url('/register/');
+    }
+
+    /**
+     * Builds the register tab content.
+     *
+     * @return string
+     */
+    private function get_register_panel_markup()
+    {
+        $shortcode_output = do_shortcode('[ultimatemember form_id="453"]');
+
+        if (trim($shortcode_output) === '') {
+            $shortcode_output = sprintf(
+                '<p class="custom-plugin-auth-fallback">%s</p>',
+                esc_html__('Form register Ultimate Member dengan ID 453 tidak ditemukan atau plugin belum aktif.', 'custom-plugin')
+            );
+        }
+
+        return sprintf(
+            '<div class="custom-plugin-auth-register"><p class="custom-plugin-auth-register__intro">%1$s</p>%2$s</div>',
+            esc_html__('Buat akun baru untuk melanjutkan ke area anggota.', 'custom-plugin'),
+            $shortcode_output
+        );
     }
 
     /**
