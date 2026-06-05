@@ -52,6 +52,10 @@ class Frontend
             return;
         }
 
+        if ($this->is_public_auth_request()) {
+            return;
+        }
+
         if (is_admin() || wp_doing_ajax() || wp_doing_cron() || is_customize_preview()) {
             return;
         }
@@ -511,7 +515,7 @@ class Frontend
                 margin-top: 20px;
             }
 
-            .um-col-alt {
+            .um-col-alt .um-right {
                 display: none !important;
             }
 
@@ -561,6 +565,27 @@ class Frontend
                 gap: 12px;
             }
 
+            .custom-plugin-auth-register .um .um-field-type_date .um-field-area {
+                position: relative;
+            }
+
+            .custom-plugin-auth-register .um .um-field-type_date .um-field-area::after {
+                content: "\1F4C5";
+                position: absolute;
+                top: 50%;
+                right: 14px;
+                transform: translateY(-50%);
+                font-size: 16px;
+                line-height: 1;
+                opacity: 0.72;
+                pointer-events: none;
+            }
+
+            .custom-plugin-auth-register .um .um-field-type_date input[type="text"] {
+                padding-right: 46px !important;
+                cursor: pointer;
+            }
+
             .custom-plugin-auth-register .um .um-field-type_file .um-single-file-preview,
             .custom-plugin-auth-register .um .um-field-type_image .um-single-image-preview {
                 width: 100%;
@@ -574,6 +599,42 @@ class Frontend
                 min-width: 164px;
                 max-width: 220px !important;
                 padding: 0 24px !important;
+            }
+
+            .custom-plugin-auth-register .um .um-field-type_file input[type="file"],
+            .custom-plugin-auth-register .um .um-field-type_image input[type="file"] {
+                display: block !important;
+                width: 100% !important;
+                margin-top: 8px;
+                color: rgba(255, 255, 255, 0.84);
+                font-size: 13px;
+            }
+
+            .custom-plugin-auth-register .um .um-field-type_file input[type="file"]::file-selector-button,
+            .custom-plugin-auth-register .um .um-field-type_image input[type="file"]::file-selector-button {
+                margin-right: 12px;
+                min-height: 40px;
+                padding: 0 18px;
+                border: 0;
+                border-radius: 999px;
+                background: #ffffff;
+                color: #050505;
+                font-weight: 700;
+                cursor: pointer;
+            }
+
+            .custom-plugin-auth-register .um .um-field-type_file .um-button+input[type="file"],
+            .custom-plugin-auth-register .um .um-field-type_image .um-button+input[type="file"] {
+                margin-top: 0;
+            }
+
+            .custom-plugin-auth-register .um .um-field-type_file .um-button,
+            .custom-plugin-auth-register .um .um-field-type_image .um-button,
+            .custom-plugin-auth-register .um .um-field-type_file a[href="#"],
+            .custom-plugin-auth-register .um .um-field-type_image a[href="#"],
+            .custom-plugin-auth-register .um .um-field-type_file .um-single-file-preview,
+            .custom-plugin-auth-register .um .um-field-type_image .um-single-image-preview {
+                display: none !important;
             }
 
             .custom-plugin-auth-register .um .um-field-type_file .um-button.um-button-disabled,
@@ -595,6 +656,54 @@ class Frontend
                 border-radius: 8px;
             }
 
+            .custom-plugin-upload-field {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                width: 100%;
+            }
+
+            .custom-plugin-upload-trigger {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 180px;
+                min-height: 46px;
+                padding: 0 24px;
+                border: 0;
+                border-radius: 999px;
+                background: #ffffff;
+                color: #050505;
+                font-size: 14px;
+                font-weight: 700;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+            }
+
+            .custom-plugin-upload-trigger:hover {
+                background: #e9e9e9;
+            }
+
+            .custom-plugin-upload-input {
+                position: absolute !important;
+                width: 1px !important;
+                height: 1px !important;
+                padding: 0 !important;
+                margin: -1px !important;
+                overflow: hidden !important;
+                clip: rect(0, 0, 0, 0) !important;
+                white-space: nowrap !important;
+                border: 0 !important;
+            }
+
+            .custom-plugin-upload-name {
+                color: rgba(255, 255, 255, 0.74);
+                font-size: 13px;
+                line-height: 1.5;
+                word-break: break-word;
+            }
+
             .custom-plugin-auth-register .um .um-field-error {
                 margin-top: 8px;
             }
@@ -602,6 +711,49 @@ class Frontend
             .custom-plugin-auth-register .um .um-field-error,
             .custom-plugin-auth-register .um .um-notice {
                 border-radius: 12px;
+            }
+
+            .ui-datepicker {
+                z-index: 100001 !important;
+                background: #111111;
+                border: 1px solid rgba(255, 255, 255, 0.14);
+                border-radius: 14px;
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+                padding: 10px;
+                color: #ffffff;
+            }
+
+            .ui-datepicker .ui-datepicker-header {
+                background: transparent;
+                border: 0;
+                color: #ffffff;
+            }
+
+            .ui-datepicker .ui-datepicker-prev,
+            .ui-datepicker .ui-datepicker-next {
+                cursor: pointer;
+            }
+
+            .ui-datepicker table th,
+            .ui-datepicker table td a {
+                color: #ffffff;
+            }
+
+            .ui-datepicker table td a {
+                border-radius: 8px;
+                text-align: center;
+            }
+
+            .ui-datepicker table td a.ui-state-active,
+            .ui-datepicker table td a.ui-state-hover {
+                background: #ffffff;
+                color: #050505;
+                border: 0;
+            }
+
+            .ui-datepicker .ui-state-default {
+                background: transparent;
+                border: 0;
             }
 
             .custom-plugin-auth-fallback {
@@ -769,6 +921,7 @@ class Frontend
     {
         $register_markup = $this->get_register_panel_markup();
         $logo_url = $this->get_login_logo_url();
+        $register_action_url = $this->get_register_submission_url();
     ?>
         <div id="custom-plugin-register-panel-template" class="custom-plugin-auth-register" hidden>
             <?php echo $register_markup; ?>
@@ -844,6 +997,13 @@ class Frontend
                     registerTemplate.hidden = false;
                     registerPanel.appendChild(registerTemplate);
 
+                    var registerForm = registerPanel.querySelector('form');
+                    if (registerForm) {
+                        registerForm.setAttribute('action', '<?php echo esc_url($register_action_url); ?>');
+                        registerForm.setAttribute('method', 'post');
+                        registerForm.setAttribute('enctype', 'multipart/form-data');
+                    }
+
                     if (authBrand.innerHTML !== '') {
                         shell.appendChild(authBrand);
                     }
@@ -862,6 +1022,12 @@ class Frontend
                         registerTab.setAttribute('aria-selected', loginIsActive ? 'false' : 'true');
                         loginPanel.classList.toggle('is-active', loginIsActive);
                         registerPanel.classList.toggle('is-active', !loginIsActive);
+
+                        if (!loginIsActive) {
+                            window.setTimeout(function() {
+                                initUltimateMemberEnhancements(registerPanel);
+                            }, 50);
+                        }
                     }
 
                     loginTab.addEventListener('click', function() {
@@ -871,6 +1037,101 @@ class Frontend
                     registerTab.addEventListener('click', function() {
                         setActiveTab('register');
                     });
+
+                    initUltimateMemberEnhancements(registerPanel);
+                }
+
+                function initUltimateMemberEnhancements(container) {
+                    if (!window.jQuery) {
+                        return;
+                    }
+
+                    var $ = window.jQuery;
+                    var $container = $(container);
+
+                    if ($.fn.datepicker) {
+                        $container.find('.um-field-type_date input[type="text"], input.um-datepicker, input[data-um-datepicker]').each(function() {
+                            var $input = $(this);
+
+                            if ($input.hasClass('hasDatepicker')) {
+                                $input.datepicker('destroy');
+                            }
+
+                            $input.datepicker({
+                                dateFormat: 'yy-mm-dd',
+                                changeMonth: true,
+                                changeYear: true,
+                                yearRange: '1900:+0',
+                                showAnim: 'fadeIn'
+                            });
+                        });
+                    }
+
+                    $container.find('.um-field-type_file, .um-field-type_image').each(function() {
+                        var field = this;
+
+                        if (field.dataset.customPluginUploadReady === '1') {
+                            return;
+                        }
+
+                        field.dataset.customPluginUploadReady = '1';
+
+                        var fieldArea = field.querySelector('.um-field-area') || field;
+                        var input = field.querySelector('input[type="file"]');
+                        var hiddenInput = field.querySelector('input[type="hidden"][name]');
+                        var key = field.getAttribute('data-key') || field.dataset.key || '';
+
+                        if (!key && hiddenInput) {
+                            key = hiddenInput.getAttribute('name') || '';
+                        }
+
+                        if (!input && key !== '') {
+                            input = document.createElement('input');
+                            input.type = 'file';
+                            input.name = key;
+                            fieldArea.appendChild(input);
+                        }
+
+                        if (!input) {
+                            return;
+                        }
+
+                        input.classList.add('custom-plugin-upload-input');
+
+                        var uploadShell = document.createElement('div');
+                        uploadShell.className = 'custom-plugin-upload-field';
+
+                        var trigger = document.createElement('button');
+                        trigger.type = 'button';
+                        trigger.className = 'custom-plugin-upload-trigger';
+                        trigger.textContent = 'Pilih File';
+
+                        var fileName = document.createElement('div');
+                        fileName.className = 'custom-plugin-upload-name';
+                        fileName.textContent = 'Belum ada file dipilih';
+
+                        trigger.addEventListener('click', function(event) {
+                            event.preventDefault();
+                            input.click();
+                        });
+
+                        input.addEventListener('change', function() {
+                            var selectedName = input.files && input.files[0] ? input.files[0].name : 'Belum ada file dipilih';
+                            fileName.textContent = selectedName;
+                        });
+
+                        uploadShell.appendChild(trigger);
+                        uploadShell.appendChild(fileName);
+                        fieldArea.appendChild(uploadShell);
+                    });
+
+                    $container.find('form').attr('enctype', 'multipart/form-data');
+
+                    $(document)
+                        .off('click.customPluginUmUpload')
+                        .on('click.customPluginUmUpload', '.custom-plugin-auth-register .um .um-field-type_file a[href="#"], .custom-plugin-auth-register .um .um-field-type_image a[href="#"]', function(event) {
+                            event.preventDefault();
+                        });
                 }
 
                 if (document.readyState === 'loading') {
@@ -891,8 +1152,11 @@ class Frontend
      */
     public function enqueue_login_form_assets()
     {
+        wp_enqueue_script('jquery');
         wp_enqueue_media();
+        wp_enqueue_script('jquery-ui-datepicker');
         wp_enqueue_script('plupload-all');
+        wp_enqueue_script('wp-plupload');
         wp_enqueue_script('jquery-ui-sortable');
         wp_enqueue_script('jquery-ui-draggable');
         wp_enqueue_style('buttons');
@@ -905,6 +1169,33 @@ class Frontend
         if (wp_script_is('underscore', 'registered')) {
             wp_enqueue_script('underscore');
         }
+    }
+
+    /**
+     * Allows public access to auth-related requests needed for registration.
+     *
+     * @return bool
+     */
+    private function is_public_auth_request()
+    {
+        if (isset($_GET['custom_plugin_um_register']) && '1' === sanitize_text_field(wp_unslash($_GET['custom_plugin_um_register']))) {
+            return true;
+        }
+
+        $register_url = $this->get_register_page_url();
+        if (empty($register_url)) {
+            return false;
+        }
+
+        $request_uri = isset($_SERVER['REQUEST_URI']) ? wp_unslash($_SERVER['REQUEST_URI']) : '';
+        if ($request_uri === '') {
+            return false;
+        }
+
+        $request_path = wp_parse_url(home_url($request_uri), PHP_URL_PATH);
+        $register_path = wp_parse_url($register_url, PHP_URL_PATH);
+
+        return !empty($request_path) && !empty($register_path) && untrailingslashit($request_path) === untrailingslashit($register_path);
     }
 
     /**
@@ -958,6 +1249,16 @@ class Frontend
         }
 
         return home_url('/register/');
+    }
+
+    /**
+     * Gets the working submission URL for the register form.
+     *
+     * @return string
+     */
+    private function get_register_submission_url()
+    {
+        return add_query_arg('custom_plugin_um_register', '1', $this->get_register_page_url());
     }
 
     /**
