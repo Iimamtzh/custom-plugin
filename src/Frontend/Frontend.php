@@ -20,6 +20,7 @@ class Frontend
         // add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
         add_filter('language_attributes', array($this, 'velocitytheme_color_scheme'));
         add_action('template_redirect', array($this, 'require_login_for_public_site'));
+        add_action('login_enqueue_scripts', array($this, 'enqueue_login_form_assets'), 5);
         add_action('login_enqueue_scripts', array($this, 'customize_login_screen'));
         add_action('login_header', array($this, 'render_login_topbar'));
         add_action('login_footer', array($this, 'render_login_tabs_script'));
@@ -199,7 +200,7 @@ class Frontend
             }
 
             .custom-plugin-login-topbar__inner {
-                max-width: 1180px;
+                max-width: 100%;
                 min-height: 56px;
                 margin: 0 auto;
                 display: flex;
@@ -240,6 +241,10 @@ class Frontend
                 list-style: none;
             }
 
+            .custom-plugin-login-nav li:not(:first-child) {
+                display: none !important;
+            }
+
             .custom-plugin-login-nav a {
                 display: inline-flex;
                 align-items: center;
@@ -265,22 +270,42 @@ class Frontend
             .custom-plugin-auth-shell {
                 display: flex;
                 flex-direction: column;
-                gap: 24px;
+                gap: 20px;
+            }
+
+            .custom-plugin-auth-brand {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 100%;
+                margin: 0 auto -4px;
+            }
+
+            .custom-plugin-auth-brand img {
+                width: 96px;
+                height: 96px;
+                object-fit: contain;
+                display: block;
             }
 
             .custom-plugin-auth-tabs {
-                display: inline-flex;
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
                 gap: 8px;
+                width: min(100%, 320px);
+                margin: 0 auto;
                 padding: 6px;
-                background: rgba(255, 255, 255, 0.04);
-                border: 1px solid rgba(255, 255, 255, 0.08);
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
                 border-radius: 999px;
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
                 align-self: center;
             }
 
             .custom-plugin-auth-tab {
-                min-height: 42px;
-                padding: 0 20px;
+                width: 100%;
+                min-height: 44px;
+                padding: 0 18px;
                 border: 0;
                 border-radius: 999px;
                 background: transparent;
@@ -288,13 +313,14 @@ class Frontend
                 font-size: 14px;
                 font-weight: 700;
                 cursor: pointer;
-                transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+                text-align: center;
+                transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
             }
 
             .custom-plugin-auth-tab.is-active {
                 background: #ffffff;
                 color: #050505;
-                box-shadow: 0 10px 30px rgba(255, 255, 255, 0.12);
+                box-shadow: 0 10px 30px rgba(255, 255, 255, 0.14);
             }
 
             .custom-plugin-auth-tab:hover {
@@ -315,22 +341,34 @@ class Frontend
                 gap: 18px;
             }
 
+            .custom-plugin-auth-login-content h1 {
+                display: none;
+            }
+
             .custom-plugin-auth-register {
-                padding: 26px 24px 24px;
+                padding: 26px 24px 24px !important;
                 background: rgba(255, 255, 255, 0.02);
                 border: 1px solid rgba(255, 255, 255, 0.08);
                 border-radius: 18px;
             }
 
+            .custom-plugin-auth-register[hidden] {
+                display: none !important;
+            }
+
             .custom-plugin-auth-register__intro {
-                margin: 0 0 18px;
+                margin: 0 0 24px;
                 color: rgba(255, 255, 255, 0.68);
                 font-size: 14px;
                 line-height: 1.6;
                 text-align: center;
             }
 
-            .custom-plugin-auth-register .um {
+            .custom-plugin-auth-register .um,
+            .custom-plugin-auth-register .um-form,
+            .custom-plugin-auth-register .um form {
+                width: 100% !important;
+                max-width: none !important;
                 color: #ffffff;
             }
 
@@ -344,21 +382,116 @@ class Frontend
                 margin: 0;
             }
 
+            .custom-plugin-auth-register .um-row {
+                margin-bottom: 18px;
+            }
+
+            .custom-plugin-auth-register .um-col-alt,
+            .custom-plugin-auth-register .um-col-1,
+            .custom-plugin-auth-register .um-col-121,
+            .custom-plugin-auth-register .um-col-122,
+            .custom-plugin-auth-register .um-half {
+                width: 100% !important;
+                float: none !important;
+                padding: 0 !important;
+            }
+
             .custom-plugin-auth-register .um .um-field-label label,
             .custom-plugin-auth-register .um .um-field-label {
                 color: rgba(255, 255, 255, 0.84);
+                font-size: 13px;
+                font-weight: 600;
+                margin-bottom: 8px;
+            }
+
+            .custom-plugin-auth-register .um .um-field {
+                position: relative;
+            }
+
+            .custom-plugin-auth-register .um input[type="text"],
+            .custom-plugin-auth-register .um input[type="password"],
+            .custom-plugin-auth-register .um input[type="email"],
+            .custom-plugin-auth-register .um input[type="tel"],
+            .custom-plugin-auth-register .um input[type="number"],
+            .custom-plugin-auth-register .um textarea,
+            .custom-plugin-auth-register .um select {
+                width: 100% !important;
+                min-height: 46px;
+                padding: 12px 14px !important;
+                font-size: 14px !important;
+                line-height: 1.45;
+                background: rgba(255, 255, 255, 0.06) !important;
+                border: 1px solid rgba(255, 255, 255, 0.14) !important;
+                color: #ffffff !important;
+                border-radius: 12px !important;
+                box-shadow: none !important;
+            }
+
+            .custom-plugin-auth-register .um textarea {
+                min-height: 108px;
+                resize: vertical;
+            }
+
+            .custom-plugin-auth-register .um input::placeholder,
+            .custom-plugin-auth-register .um textarea::placeholder {
+                color: rgba(255, 255, 255, 0.4);
+            }
+
+            .custom-plugin-auth-register .um input:focus,
+            .custom-plugin-auth-register .um textarea:focus,
+            .custom-plugin-auth-register .um select:focus {
+                border-color: rgba(255, 255, 255, 0.35) !important;
+                box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18) !important;
+                outline: none;
+            }
+
+            .custom-plugin-auth-register .um-field-checkbox,
+            .custom-plugin-auth-register .um-field-radio {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 14px;
+            }
+
+            .custom-plugin-auth-register .um-field-checkbox-option,
+            .custom-plugin-auth-register .um-field-radio-option {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                margin: 0 !important;
+                color: rgba(255, 255, 255, 0.84);
+                font-size: 13px;
+            }
+
+            .custom-plugin-auth-register .um-field-area {
+                margin-top: 8px;
+            }
+
+            .custom-plugin-auth-register .um-field:not(.um-field-checkbox):not(.um-field-radio) .um-field-area {
+                width: 100%;
+            }
+
+            .custom-plugin-auth-register .um-field-block {
+                width: 100%;
             }
 
             .custom-plugin-auth-register .um input[type="submit"],
             .custom-plugin-auth-register .um-button,
             .custom-plugin-auth-register .um a.um-button {
-                min-height: 44px !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                width: 100% !important;
+                min-height: 46px !important;
                 border: 0 !important;
                 border-radius: 999px !important;
                 background: #ffffff !important;
                 color: #000000 !important;
                 box-shadow: none !important;
                 font-weight: 700 !important;
+                font-size: 14px !important;
+                /* padding: 0 20px !important; */
+                text-decoration: none !important;
+                margin-top: 20px !important;
             }
 
             .custom-plugin-auth-register .um input[type="submit"]:hover,
@@ -367,8 +500,99 @@ class Frontend
                 background: #e9e9e9 !important;
             }
 
+            .custom-plugin-auth-register .um .um-field-type_block {
+                margin-bottom: 0;
+            }
+
+            .custom-plugin-auth-register .um .um-col-alt-b {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                margin-top: 20px;
+            }
+
+            .custom-plugin-auth-register .um .um-left,
+            .custom-plugin-auth-register .um .um-right {
+                float: none !important;
+                width: 100% !important;
+                text-align: left !important;
+            }
+
             .custom-plugin-auth-register .um .um-link {
                 color: rgba(255, 255, 255, 0.76) !important;
+            }
+
+            .custom-plugin-auth-register .um .um-col-alt-b .um-alt,
+            .custom-plugin-auth-register .um .um-col-alt-b .um-left a,
+            .custom-plugin-auth-register .um .um-col-alt-b .um-right a,
+            .custom-plugin-auth-register .um .um-login,
+            .custom-plugin-auth-register .um .um-login a {
+                display: none !important;
+            }
+
+            .custom-plugin-auth-register .um .um-account-side,
+            .custom-plugin-auth-register .um .um-account-main {
+                width: 100% !important;
+            }
+
+            .custom-plugin-auth-register .um .um-single-image-preview,
+            .custom-plugin-auth-register .um .um-single-file-preview {
+                margin-bottom: 12px;
+            }
+
+            .custom-plugin-auth-register .um .um-single-file-preview-show,
+            .custom-plugin-auth-register .um .um-single-image-preview-show {
+                color: rgba(255, 255, 255, 0.84) !important;
+            }
+
+            .custom-plugin-auth-register .um .um-single-file-preview-show a {
+                color: #ffffff !important;
+            }
+
+            .custom-plugin-auth-register .um .um-field-type_file .um-field-area,
+            .custom-plugin-auth-register .um .um-field-type_image .um-field-area {
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+
+            .custom-plugin-auth-register .um .um-field-type_file .um-single-file-preview,
+            .custom-plugin-auth-register .um .um-field-type_image .um-single-image-preview {
+                width: 100%;
+            }
+
+            .custom-plugin-auth-register .um .um-field-type_file .um-button,
+            .custom-plugin-auth-register .um .um-field-type_image .um-button,
+            .custom-plugin-auth-register .um .um-field-type_file a.um-button,
+            .custom-plugin-auth-register .um .um-field-type_image a.um-button {
+                width: auto !important;
+                min-width: 164px;
+                max-width: 220px !important;
+                padding: 0 24px !important;
+            }
+
+            .custom-plugin-auth-register .um .um-field-type_file .um-button.um-button-disabled,
+            .custom-plugin-auth-register .um .um-field-type_image .um-button.um-button-disabled {
+                opacity: 0.6;
+            }
+
+            .custom-plugin-auth-register .um .um-single-file-preview-show,
+            .custom-plugin-auth-register .um .um-single-image-preview-show,
+            .custom-plugin-auth-register .um .um-single-file-preview-show .filename {
+                word-break: break-word;
+            }
+
+            .custom-plugin-auth-register .um .um-field-type_file .um-single-file-preview-show code,
+            .custom-plugin-auth-register .um .um-field-type_image .um-single-image-preview-show code {
+                background: rgba(255, 255, 255, 0.06);
+                color: #ffffff;
+                padding: 4px 8px;
+                border-radius: 8px;
+            }
+
+            .custom-plugin-auth-register .um .um-field-error {
+                margin-top: 8px;
             }
 
             .custom-plugin-auth-register .um .um-field-error,
@@ -416,6 +640,11 @@ class Frontend
                     padding: 22px 18px 18px;
                 }
 
+                .custom-plugin-auth-brand img {
+                    width: 84px;
+                    height: 84px;
+                }
+
                 .custom-plugin-login-brand {
                     font-size: 13px;
                 }
@@ -448,7 +677,7 @@ class Frontend
                 <?php echo $this->get_login_menu_markup(); ?>
             </div>
         </div>
-<?php
+    <?php
     }
 
     /**
@@ -535,100 +764,143 @@ class Frontend
     public function render_login_tabs_script()
     {
         $register_markup = $this->get_register_panel_markup();
-        ?>
-        <div id="custom-plugin-register-panel-template" style="display:none;">
+        $logo_url = $this->get_login_logo_url();
+    ?>
+        <div id="custom-plugin-register-panel-template" class="custom-plugin-auth-register" hidden>
             <?php echo $register_markup; ?>
         </div>
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                var loginRoot = document.getElementById('login');
-                if (!loginRoot || loginRoot.dataset.customPluginTabsReady === '1') {
+            (function() {
+                function initCustomPluginAuthTabs() {
+                    var loginRoot = document.getElementById('login');
+                    if (!loginRoot || loginRoot.dataset.customPluginTabsReady === '1') {
+                        return;
+                    }
+
+                    var loginTitle = loginRoot.querySelector('h1');
+                    var loginForm = loginRoot.querySelector('form');
+                    var nav = loginRoot.querySelector('#nav');
+                    var backToBlog = loginRoot.querySelector('#backtoblog');
+                    var registerTemplate = document.getElementById('custom-plugin-register-panel-template');
+
+                    if (!loginTitle || !loginForm || !registerTemplate) {
+                        return;
+                    }
+
+                    var shell = document.createElement('div');
+                    shell.className = 'custom-plugin-auth-shell';
+
+                    var authBrand = document.createElement('div');
+                    authBrand.className = 'custom-plugin-auth-brand';
+                    <?php if (!empty($logo_url)) : ?>
+                        authBrand.innerHTML = '<img src="<?php echo esc_url($logo_url); ?>" alt="<?php echo esc_attr(get_bloginfo('name')); ?>">';
+                    <?php endif; ?>
+
+                    var tabs = document.createElement('div');
+                    tabs.className = 'custom-plugin-auth-tabs';
+                    tabs.setAttribute('role', 'tablist');
+                    tabs.setAttribute('aria-label', 'Authentication tabs');
+
+                    var loginTab = document.createElement('button');
+                    loginTab.type = 'button';
+                    loginTab.className = 'custom-plugin-auth-tab is-active';
+                    loginTab.textContent = 'Login';
+                    loginTab.setAttribute('role', 'tab');
+                    loginTab.setAttribute('aria-selected', 'true');
+
+                    var registerTab = document.createElement('button');
+                    registerTab.type = 'button';
+                    registerTab.className = 'custom-plugin-auth-tab';
+                    registerTab.textContent = 'Register';
+                    registerTab.setAttribute('role', 'tab');
+                    registerTab.setAttribute('aria-selected', 'false');
+
+                    tabs.appendChild(loginTab);
+                    tabs.appendChild(registerTab);
+
+                    var loginPanel = document.createElement('section');
+                    loginPanel.className = 'custom-plugin-auth-panel is-active';
+                    loginPanel.setAttribute('role', 'tabpanel');
+
+                    var loginContent = document.createElement('div');
+                    loginContent.className = 'custom-plugin-auth-login-content';
+                    loginContent.appendChild(loginTitle);
+                    loginContent.appendChild(loginForm);
+                    if (nav) {
+                        loginContent.appendChild(nav);
+                    }
+                    if (backToBlog) {
+                        loginContent.appendChild(backToBlog);
+                    }
+                    loginPanel.appendChild(loginContent);
+
+                    var registerPanel = document.createElement('section');
+                    registerPanel.className = 'custom-plugin-auth-panel';
+                    registerPanel.setAttribute('role', 'tabpanel');
+                    registerTemplate.hidden = false;
+                    registerPanel.appendChild(registerTemplate);
+
+                    if (authBrand.innerHTML !== '') {
+                        shell.appendChild(authBrand);
+                    }
+                    shell.appendChild(tabs);
+                    shell.appendChild(loginPanel);
+                    shell.appendChild(registerPanel);
+
+                    loginRoot.appendChild(shell);
+                    loginRoot.dataset.customPluginTabsReady = '1';
+
+                    function setActiveTab(tabName) {
+                        var loginIsActive = tabName === 'login';
+                        loginTab.classList.toggle('is-active', loginIsActive);
+                        registerTab.classList.toggle('is-active', !loginIsActive);
+                        loginTab.setAttribute('aria-selected', loginIsActive ? 'true' : 'false');
+                        registerTab.setAttribute('aria-selected', loginIsActive ? 'false' : 'true');
+                        loginPanel.classList.toggle('is-active', loginIsActive);
+                        registerPanel.classList.toggle('is-active', !loginIsActive);
+                    }
+
+                    loginTab.addEventListener('click', function() {
+                        setActiveTab('login');
+                    });
+
+                    registerTab.addEventListener('click', function() {
+                        setActiveTab('register');
+                    });
+                }
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initCustomPluginAuthTabs);
                     return;
                 }
 
-                var loginTitle = loginRoot.querySelector('h1');
-                var loginForm = loginRoot.querySelector('form');
-                var nav = loginRoot.querySelector('#nav');
-                var backToBlog = loginRoot.querySelector('#backtoblog');
-                var registerTemplate = document.getElementById('custom-plugin-register-panel-template');
-
-                if (!loginTitle || !loginForm || !registerTemplate) {
-                    return;
-                }
-
-                var shell = document.createElement('div');
-                shell.className = 'custom-plugin-auth-shell';
-
-                var tabs = document.createElement('div');
-                tabs.className = 'custom-plugin-auth-tabs';
-                tabs.setAttribute('role', 'tablist');
-                tabs.setAttribute('aria-label', 'Authentication tabs');
-
-                var loginTab = document.createElement('button');
-                loginTab.type = 'button';
-                loginTab.className = 'custom-plugin-auth-tab is-active';
-                loginTab.textContent = 'Login';
-                loginTab.setAttribute('role', 'tab');
-                loginTab.setAttribute('aria-selected', 'true');
-
-                var registerTab = document.createElement('button');
-                registerTab.type = 'button';
-                registerTab.className = 'custom-plugin-auth-tab';
-                registerTab.textContent = 'Register';
-                registerTab.setAttribute('role', 'tab');
-                registerTab.setAttribute('aria-selected', 'false');
-
-                tabs.appendChild(loginTab);
-                tabs.appendChild(registerTab);
-
-                var loginPanel = document.createElement('section');
-                loginPanel.className = 'custom-plugin-auth-panel is-active';
-                loginPanel.setAttribute('role', 'tabpanel');
-
-                var loginContent = document.createElement('div');
-                loginContent.className = 'custom-plugin-auth-login-content';
-                loginContent.appendChild(loginTitle);
-                loginContent.appendChild(loginForm);
-                if (nav) {
-                    loginContent.appendChild(nav);
-                }
-                if (backToBlog) {
-                    loginContent.appendChild(backToBlog);
-                }
-                loginPanel.appendChild(loginContent);
-
-                var registerPanel = document.createElement('section');
-                registerPanel.className = 'custom-plugin-auth-panel';
-                registerPanel.setAttribute('role', 'tabpanel');
-                registerPanel.innerHTML = registerTemplate.innerHTML;
-
-                shell.appendChild(tabs);
-                shell.appendChild(loginPanel);
-                shell.appendChild(registerPanel);
-
-                loginRoot.appendChild(shell);
-                loginRoot.dataset.customPluginTabsReady = '1';
-
-                function setActiveTab(tabName) {
-                    var loginIsActive = tabName === 'login';
-                    loginTab.classList.toggle('is-active', loginIsActive);
-                    registerTab.classList.toggle('is-active', !loginIsActive);
-                    loginTab.setAttribute('aria-selected', loginIsActive ? 'true' : 'false');
-                    registerTab.setAttribute('aria-selected', loginIsActive ? 'false' : 'true');
-                    loginPanel.classList.toggle('is-active', loginIsActive);
-                    registerPanel.classList.toggle('is-active', !loginIsActive);
-                }
-
-                loginTab.addEventListener('click', function () {
-                    setActiveTab('login');
-                });
-
-                registerTab.addEventListener('click', function () {
-                    setActiveTab('register');
-                });
-            });
+                initCustomPluginAuthTabs();
+            })();
         </script>
-        <?php
+<?php
+    }
+
+    /**
+     * Loads media and script dependencies needed by Ultimate Member fields on wp-login.php.
+     *
+     * @return void
+     */
+    public function enqueue_login_form_assets()
+    {
+        wp_enqueue_media();
+        wp_enqueue_script('plupload-all');
+        wp_enqueue_script('jquery-ui-sortable');
+        wp_enqueue_script('jquery-ui-draggable');
+        wp_enqueue_style('buttons');
+        wp_enqueue_style('dashicons');
+
+        if (wp_script_is('wp-util', 'registered')) {
+            wp_enqueue_script('wp-util');
+        }
+
+        if (wp_script_is('underscore', 'registered')) {
+            wp_enqueue_script('underscore');
+        }
     }
 
     /**
@@ -701,7 +973,7 @@ class Frontend
         }
 
         return sprintf(
-            '<div class="custom-plugin-auth-register"><p class="custom-plugin-auth-register__intro">%1$s</p>%2$s</div>',
+            '<div class="custom-plugin-auth-register__inner"><p class="custom-plugin-auth-register__intro">%1$s</p>%2$s</div>',
             esc_html__('Buat akun baru untuk melanjutkan ke area anggota.', 'custom-plugin'),
             $shortcode_output
         );
