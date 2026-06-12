@@ -63,7 +63,7 @@ class Frontend
             return;
         }
 
-        wp_safe_redirect('https://gardaindobersatu.com/profile/');
+        wp_redirect('https://gardaindobersatu.com/profile/');
         exit;
     }
 
