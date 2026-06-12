@@ -51,10 +51,6 @@ class Frontend
             return;
         }
 
-        if ($this->is_public_auth_page()) {
-            return;
-        }
-
         if (is_admin() || wp_doing_ajax() || wp_doing_cron() || is_customize_preview()) {
             return;
         }
@@ -68,28 +64,6 @@ class Frontend
         }
         wp_redirect(site_url('/profile/'));
         exit;
-    }
-
-    /**
-     * Allows public access to the frontend register page.
-     *
-     * @return bool
-     */
-    private function is_public_auth_page()
-    {
-        $request_uri = isset($_SERVER['REQUEST_URI']) ? wp_unslash($_SERVER['REQUEST_URI']) : '';
-        if ($request_uri === '') {
-            return false;
-        }
-
-        $request_path = wp_parse_url(home_url($request_uri), PHP_URL_PATH);
-        $register_path = wp_parse_url($this->get_register_page_url(), PHP_URL_PATH);
-
-        if (empty($request_path) || empty($register_path)) {
-            return false;
-        }
-
-        return untrailingslashit($request_path) === untrailingslashit($register_path);
     }
 
     /**
@@ -523,7 +497,6 @@ class Frontend
     public function render_login_tabs_script()
     {
         $logo_url = $this->get_login_logo_url();
-        $register_url = $this->get_register_page_url();
     ?>
         <script>
             (function() {
@@ -552,28 +525,6 @@ class Frontend
                             '<img src="<?php echo esc_url($logo_url); ?>" alt="<?php echo esc_attr(get_bloginfo('name')); ?>">';
                     <?php endif; ?>
 
-                    var tabs = document.createElement('div');
-                    tabs.className = 'custom-plugin-auth-tabs';
-                    tabs.setAttribute('role', 'tablist');
-                    tabs.setAttribute('aria-label', 'Authentication tabs');
-
-                    var loginTab = document.createElement('button');
-                    loginTab.type = 'button';
-                    loginTab.className = 'custom-plugin-auth-tab is-active';
-                    loginTab.textContent = 'Login';
-                    loginTab.setAttribute('role', 'tab');
-                    loginTab.setAttribute('aria-selected', 'true');
-
-                    var registerTab = document.createElement('button');
-                    registerTab.type = 'button';
-                    registerTab.className = 'custom-plugin-auth-tab';
-                    registerTab.textContent = 'Register';
-                    registerTab.setAttribute('role', 'tab');
-                    registerTab.setAttribute('aria-selected', 'false');
-
-                    tabs.appendChild(loginTab);
-                    tabs.appendChild(registerTab);
-
                     var loginPanel = document.createElement('section');
                     loginPanel.className = 'custom-plugin-auth-panel is-active';
                     loginPanel.setAttribute('role', 'tabpanel');
@@ -593,22 +544,10 @@ class Frontend
                     if (authBrand.innerHTML !== '') {
                         shell.appendChild(authBrand);
                     }
-                    shell.appendChild(tabs);
                     shell.appendChild(loginPanel);
 
                     loginRoot.appendChild(shell);
                     loginRoot.dataset.customPluginTabsReady = '1';
-
-                    loginTab.addEventListener('click', function() {
-                        loginTab.classList.add('is-active');
-                        registerTab.classList.remove('is-active');
-                        loginTab.setAttribute('aria-selected', 'true');
-                        registerTab.setAttribute('aria-selected', 'false');
-                    });
-
-                    registerTab.addEventListener('click', function() {
-                        window.location.href = '<?php echo esc_url($register_url); ?>';
-                    });
                 }
 
                 if (document.readyState === 'loading') {
@@ -620,41 +559,6 @@ class Frontend
             })();
         </script>
 <?php
-    }
-
-    /**
-     * Finds the most likely frontend menu location from the active theme.
-     *
-     * @return string
-     */
-    private function get_login_menu_location()
-    {
-        $locations = get_nav_menu_locations();
-        if (empty($locations) || !is_array($locations)) {
-            return '';
-        }
-
-        $preferred_locations = array('primary', 'main', 'header', 'top', 'menu-1');
-
-        foreach ($preferred_locations as $location) {
-            if (!empty($locations[$location])) {
-                return $location;
-            }
-        }
-
-        $available_locations = array_keys(array_filter($locations));
-
-        return !empty($available_locations) ? $available_locations[0] : '';
-    }
-
-    /**
-     * Resolves the registration page URL, preferring Ultimate Member when available.
-     *
-     * @return string
-     */
-    private function get_register_page_url()
-    {
-        return home_url('/register/');
     }
 
     /**
