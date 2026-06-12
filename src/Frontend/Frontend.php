@@ -63,6 +63,9 @@ class Frontend
             return;
         }
 
+        if (is_page('profile')) {
+            return;
+        }
         wp_redirect(site_url('/profile/'));
         exit;
     }
