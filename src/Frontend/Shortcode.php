@@ -220,17 +220,33 @@ class Shortcode
         </button>
         <script>
             (function() {
-                // Inisialisasi Bootstrap Popover
+                // Inisialisasi Bootstrap Popover setelah Bootstrap siap
                 const popoverTrigger = document.getElementById('primary-menu-toggle');
-                if (typeof bootstrap !== 'undefined' && bootstrap.Popover) {
-                    new bootstrap.Popover(popoverTrigger);
-                } else {
-                    // Fallback jika Bootstrap JS tidak terload
-                    popoverTrigger.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        alert('Bootstrap JS tidak terdeteksi! Silakan load Bootstrap JS untuk menggunakan popover.');
-                    });
+
+                function initPopover() {
+                    if (typeof bootstrap !== 'undefined' && bootstrap.Popover) {
+                        new bootstrap.Popover(popoverTrigger);
+                        return true;
+                    }
+                    return false;
                 }
+
+                // Polling setiap 100ms sampai Bootstrap siap
+                let pollCount = 0;
+                const pollInterval = setInterval(function() {
+                    pollCount++;
+                    if (initPopover()) {
+                        clearInterval(pollInterval);
+                    } else if (pollCount > 100) { // Timeout setelah 10 detik
+                        clearInterval(pollInterval);
+                        console.error('Bootstrap JS tidak terdeteksi!');
+                    }
+                }, 100);
+
+                // Atau tunggu window load
+                window.addEventListener('load', function() {
+                    initPopover();
+                });
             })();
         </script>
 <?php
