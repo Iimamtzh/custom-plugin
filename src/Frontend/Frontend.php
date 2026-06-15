@@ -619,11 +619,30 @@ class Frontend
             })();
         </script>
         <style>
-            .dark-mode {
+            /* Dark Mode Global Styles */
+            .dark-mode,
+            .dark-mode body {
                 background-color: #0f172a !important;
                 color: #f1f5f9 !important;
             }
 
+            /* Dark Mode untuk Semua Elemen Umum */
+            .dark-mode p,
+            .dark-mode span,
+            .dark-mode h1,
+            .dark-mode h2,
+            .dark-mode h3,
+            .dark-mode h4,
+            .dark-mode h5,
+            .dark-mode h6,
+            .dark-mode div,
+            .dark-mode li,
+            .dark-mode ul,
+            .dark-mode ol {
+                color: #f1f5f9 !important;
+            }
+
+            /* Dark Mode untuk Link */
             .dark-mode a {
                 color: #94a3b8 !important;
             }
@@ -632,6 +651,7 @@ class Frontend
                 color: #e2e8f0 !important;
             }
 
+            /* Dark Mode untuk Tombol */
             .dark-mode .btn-outline-secondary {
                 border-color: #475569 !important;
                 color: #cbd5e1 !important;
@@ -642,6 +662,7 @@ class Frontend
                 border-color: #475569 !important;
             }
 
+            /* Dark Mode untuk Form */
             .dark-mode .form-control {
                 background-color: #1e293b !important;
                 border-color: #475569 !important;
@@ -651,6 +672,37 @@ class Frontend
             .dark-mode .form-control::placeholder {
                 color: #94a3b8 !important;
             }
+
+            /* Dark Mode untuk Card/Container Lainnya */
+            .dark-mode .card,
+            .dark-mode .container,
+            .dark-mode .container-fluid,
+            .dark-mode .row,
+            .dark-mode .col,
+            .dark-mode article,
+            .dark-mode section,
+            .dark-mode header,
+            .dark-mode footer,
+            .dark-mode nav,
+            .dark-mode main {
+                background-color: #0f172a !important;
+            }
+
+            /* Dark Mode untuk Popover */
+            .dark-mode .popover {
+                background-color: #1e293b !important;
+                border: none !important;
+                color: #f1f5f9 !important;
+            }
+
+            .dark-mode .popover-body {
+                background-color: #1e293b !important;
+                color: #f1f5f9 !important;
+            }
+
+            /* Jika tema Anda punya class khusus, Anda bisa menambahkannya di sini!
+            /* Contoh: */
+            /* .dark-mode .nama-class-tema-anda { background-color: #1e293b !important; }
         </style>
 <?php
     }
