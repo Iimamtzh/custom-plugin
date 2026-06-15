@@ -22,6 +22,7 @@ class Shortcode
         // add_shortcode('custom_hello', array($this, 'hello_shortcode'));
         add_shortcode('show-view', array($this, 'show_view'));
         add_shortcode('show-tags', array($this, 'show_tags'));
+        add_shortcode('show-date', array($this, 'show_date'));
     }
 
     public function show_view()
@@ -55,6 +56,38 @@ class Shortcode
             echo '</div>';
         }
         return ob_get_clean();
+    }
+
+    public function show_date()
+    {
+        $hari = array(
+            'Minggu',
+            'Senin',
+            'Selasa',
+            'Rabu',
+            'Kamis',
+            'Jumat',
+            'Sabtu'
+        );
+        $bulan = array(
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember'
+        );
+        $tahun = date('Y');
+        $bulan_num = date('n');
+        $tanggal = date('j');
+        $hari_num = date('w');
+        return $hari[$hari_num] . ', ' . $tanggal . ' ' . $bulan[$bulan_num] . ' ' . $tahun;
     }
 
     /**
