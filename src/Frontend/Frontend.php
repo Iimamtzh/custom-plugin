@@ -17,7 +17,7 @@ class Frontend
     public function __construct()
     {
         // Example: To activate frontend hooks, uncomment below.
-        // add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
+        add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
         add_filter('language_attributes', array($this, 'velocitytheme_color_scheme'));
         add_action('template_redirect', array($this, 'require_login_for_public_site'));
         add_action('login_enqueue_scripts', array($this, 'customize_login_screen'));
@@ -26,6 +26,7 @@ class Frontend
         add_filter('login_headerurl', array($this, 'get_login_header_url'));
         add_filter('login_headertext', array($this, 'get_login_header_text'));
         add_action('wp_footer', array($this, 'add_view'));
+        add_action('wp_head', array($this, 'dark_mode_prevent_flash'));
 
         // Filter with priority and number of arguments
         // add_filter('excerpt_length', array($this, 'custom_excerpt_length'), 999, 1);
@@ -575,7 +576,7 @@ class Frontend
                 initCustomPluginAuthTabs();
             })();
         </script>
-<?php
+    <?php
     }
 
     /**
@@ -604,6 +605,54 @@ class Frontend
 
         // Always provide a filter so others can modify your output
         return apply_filters('custom_plugin_format_price', $formatted, $price);
+    }
+
+    public function dark_mode_prevent_flash()
+    {
+    ?>
+        <script>
+            (function() {
+                const darkMode = localStorage.getItem('custom-plugin-dark-mode');
+                if (darkMode === 'true') {
+                    document.documentElement.classList.add('dark-mode');
+                }
+            })();
+        </script>
+        <style>
+            .dark-mode {
+                background-color: #0f172a !important;
+                color: #f1f5f9 !important;
+            }
+
+            .dark-mode a {
+                color: #94a3b8 !important;
+            }
+
+            .dark-mode a:hover {
+                color: #e2e8f0 !important;
+            }
+
+            .dark-mode .btn-outline-secondary {
+                border-color: #475569 !important;
+                color: #cbd5e1 !important;
+            }
+
+            .dark-mode .btn-outline-secondary:hover {
+                background-color: #334155 !important;
+                border-color: #475569 !important;
+            }
+
+            .dark-mode .form-control {
+                background-color: #1e293b !important;
+                border-color: #475569 !important;
+                color: #f1f5f9 !important;
+            }
+
+            .dark-mode .form-control::placeholder {
+                color: #94a3b8 !important;
+            }
+        </style>
+<?php
     }
 
     /**
