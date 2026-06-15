@@ -21,6 +21,7 @@ class Shortcode
         // Example: To activate, uncomment the line below.
         // add_shortcode('custom_hello', array($this, 'hello_shortcode'));
         add_shortcode('show-view', array($this, 'show_view'));
+        add_shortcode('show-tags', array($this, 'show_tags'));
     }
 
     public function show_view()
@@ -34,6 +35,25 @@ class Shortcode
         $count = get_post_meta($post_id, 'view_count', true);
         $count = $count ? $count : 0;
         echo '<span class="view-count">' . $count . ' views</span>';
+        return ob_get_clean();
+    }
+
+    public function show_tags()
+    {
+        ob_start();
+        global $post;
+        if (empty($post)) {
+            return '';
+        }
+        $tags = get_the_tags($post->ID);
+        if ($tags) {
+            echo '<div class="d-flex flex-wrap gap-2">';
+            foreach ($tags as $tag) {
+                $tag_link = get_tag_link($tag->term_id);
+                echo '<a href="' . esc_url($tag_link) . '" class="btn btn-outline-secondary text-decoration-none rounded-pill px-3 py-1">' . esc_html('# ' . $tag->name) . '</a>';
+            }
+            echo '</div>';
+        }
         return ob_get_clean();
     }
 
