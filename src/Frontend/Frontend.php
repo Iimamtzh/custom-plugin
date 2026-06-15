@@ -25,12 +25,29 @@ class Frontend
         add_action('login_footer', array($this, 'render_login_tabs_script'));
         add_filter('login_headerurl', array($this, 'get_login_header_url'));
         add_filter('login_headertext', array($this, 'get_login_header_text'));
+        add_action('wp_footer', array($this, 'add_view'));
 
         // Filter with priority and number of arguments
         // add_filter('excerpt_length', array($this, 'custom_excerpt_length'), 999, 1);
 
         // Trigger a custom action (so other devs can hook into your plugin)
         // do_action('custom_plugin_after_frontend_init', $this);
+    }
+
+    public function add_view()
+    {
+        global $post;
+        if (!is_single() || empty($post)) {
+            return;
+        }
+        $post_id = $post->ID;
+        $count = get_post_meta($post_id, 'view_count', true);
+        if (!$count) {
+            delete_post_meta($post_id, 'view_count');
+            add_post_meta($post_id, 'view_count', '1');
+        } else {
+            update_post_meta($post_id, 'view_count', $count + 1);
+        }
     }
 
     /**

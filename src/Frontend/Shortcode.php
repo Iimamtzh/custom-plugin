@@ -20,6 +20,21 @@ class Shortcode
     {
         // Example: To activate, uncomment the line below.
         // add_shortcode('custom_hello', array($this, 'hello_shortcode'));
+        add_shortcode('show-view', array($this, 'show_view'));
+    }
+
+    public function show_view()
+    {
+        ob_start();
+        global $post;
+        if (empty($post)) {
+            return '';
+        }
+        $post_id = $post->ID;
+        $count = get_post_meta($post_id, 'view_count', true);
+        $count = $count ? $count : 0;
+        echo '<span class="view-count">' . $count . ' views</span>';
+        return ob_get_clean();
     }
 
     /**
