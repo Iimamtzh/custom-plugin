@@ -26,7 +26,6 @@ class Frontend
         add_filter('login_headerurl', array($this, 'get_login_header_url'));
         add_filter('login_headertext', array($this, 'get_login_header_text'));
         add_action('wp_footer', array($this, 'add_view'));
-        add_action('wp_head', array($this, 'dark_mode_prevent_flash'));
 
         // Filter with priority and number of arguments
         // add_filter('excerpt_length', array($this, 'custom_excerpt_length'), 999, 1);
@@ -576,7 +575,7 @@ class Frontend
                 initCustomPluginAuthTabs();
             })();
         </script>
-    <?php
+<?php
     }
 
     /**
@@ -607,113 +606,12 @@ class Frontend
         return apply_filters('custom_plugin_format_price', $formatted, $price);
     }
 
-    public function dark_mode_prevent_flash()
-    {
-    ?>
-        <script>
-            (function() {
-                const darkMode = localStorage.getItem('custom-plugin-dark-mode');
-                if (darkMode === 'true') {
-                    document.documentElement.classList.add('dark-mode');
-                }
-            })();
-        </script>
-        <style>
-            /* Dark Mode Global Styles */
-            .dark-mode,
-            .dark-mode body {
-                background-color: #0f172a !important;
-                color: #f1f5f9 !important;
-            }
-
-            /* Dark Mode untuk Semua Elemen Umum */
-            .dark-mode p,
-            .dark-mode span,
-            .dark-mode h1,
-            .dark-mode h2,
-            .dark-mode h3,
-            .dark-mode h4,
-            .dark-mode h5,
-            .dark-mode h6,
-            .dark-mode div,
-            .dark-mode li,
-            .dark-mode ul,
-            .dark-mode ol {
-                color: #f1f5f9 !important;
-            }
-
-            /* Dark Mode untuk Link */
-            .dark-mode a {
-                color: #94a3b8 !important;
-            }
-
-            .dark-mode a:hover {
-                color: #e2e8f0 !important;
-            }
-
-            /* Dark Mode untuk Tombol */
-            .dark-mode .btn-outline-secondary {
-                border-color: #475569 !important;
-                color: #cbd5e1 !important;
-            }
-
-            .dark-mode .btn-outline-secondary:hover {
-                background-color: #334155 !important;
-                border-color: #475569 !important;
-            }
-
-            /* Dark Mode untuk Form */
-            .dark-mode .form-control {
-                background-color: #1e293b !important;
-                border-color: #475569 !important;
-                color: #f1f5f9 !important;
-            }
-
-            .dark-mode .form-control::placeholder {
-                color: #94a3b8 !important;
-            }
-
-            /* Dark Mode untuk Card/Container Lainnya */
-            .dark-mode .card,
-            .dark-mode .container,
-            .dark-mode .container-fluid,
-            .dark-mode .row,
-            .dark-mode .col,
-            .dark-mode article,
-            .dark-mode section,
-            .dark-mode header,
-            .dark-mode footer,
-            .dark-mode nav,
-            .dark-mode main {
-                background-color: #0f172a !important;
-            }
-
-            /* Dark Mode untuk Popover */
-            .dark-mode .popover {
-                background-color: #1e293b !important;
-                border: none !important;
-                color: #f1f5f9 !important;
-            }
-
-            .dark-mode .popover-body {
-                background-color: #1e293b !important;
-                color: #f1f5f9 !important;
-            }
-
-            /* Jika tema Anda punya class khusus, Anda bisa menambahkannya di sini!
-            /* Contoh: */
-            /* .dark-mode .nama-class-tema-anda { background-color: #1e293b !important; }
-        </style>
-<?php
-    }
-
     /**
      * Proper way to enqueue styles and scripts.
      */
     public function enqueue_scripts()
     {
-        // Enqueue Bootstrap CSS, JS, Popper, and Icons
-        wp_enqueue_style('bootstrap-icons', 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css', array(), '1.11.3');
+        // Enqueue Bootstrap CSS, JS, and Popper for popover
         wp_enqueue_style('bootstrap-css', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css', array(), '5.3.3');
         wp_enqueue_script('popper-js', 'https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js', array(), '2.11.8', true);
         wp_enqueue_script('bootstrap-js', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js', array('popper-js'), '5.3.3', true);
