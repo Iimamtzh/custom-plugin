@@ -206,9 +206,9 @@ class Shortcode
         <button id="primary-menu-toggle" class="btn btn-outline-secondary rounded-circle"
             style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;"
             data-bs-toggle="popover" data-bs-html="true" data-bs-placement="bottom" data-bs-content='
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; min-width: 220px;">
                 <?php foreach ($menu_items as $item) { ?>
-                    <a href="<?php echo esc_url($item->url); ?>" style="text-decoration: none; color: inherit;"><?php echo esc_html($item->title); ?></a>
+                    <a href="<?php echo esc_url($item->url); ?>" style="text-decoration: none; color: #333; padding: 6px 10px; border-radius: 6px; display: block; line-height: 1.4;"><?php echo esc_html($item->title); ?></a>
                 <?php } ?>
             </div>
         '>
