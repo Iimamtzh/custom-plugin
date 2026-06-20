@@ -25,17 +25,17 @@ class Taxonomies
     private function register_brand()
     {
         $labels = array(
-            'name'              => 'Merek',
-            'singular_name'     => 'Merek',
-            'search_items'      => 'Cari Merek',
-            'all_items'         => 'Semua Merek',
-            'parent_item'       => 'Induk Merek',
-            'parent_item_colon' => 'Induk Merek:',
-            'edit_item'         => 'Edit Merek',
-            'update_item'       => 'Perbarui Merek',
-            'add_new_item'      => 'Tambah Merek Baru',
-            'new_item_name'     => 'Nama Merek Baru',
-            'menu_name'         => 'Merek',
+            'name'              => 'Brand',
+            'singular_name'     => 'Brand',
+            'search_items'      => 'Search Brand',
+            'all_items'         => 'All Brands',
+            'parent_item'       => 'Parent Brand',
+            'parent_item_colon' => 'Parent Brand:',
+            'edit_item'         => 'Edit Brand',
+            'update_item'       => 'Update Brand',
+            'add_new_item'      => 'Add New Brand',
+            'new_item_name'     => 'New Brand Name',
+            'menu_name'         => 'Brand',
         );
 
         $args = array(
