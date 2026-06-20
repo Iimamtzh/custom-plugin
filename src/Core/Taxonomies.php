@@ -16,8 +16,39 @@ class Taxonomies
 
     public function register_taxonomies()
     {
-        // Example: Register 'project_category' Taxonomy
-        // $this->register_project_category();
+        $this->register_brand();
+    }
+
+    /**
+     * Register Brand Taxonomy
+     */
+    private function register_brand()
+    {
+        $labels = array(
+            'name'              => 'Merek',
+            'singular_name'     => 'Merek',
+            'search_items'      => 'Cari Merek',
+            'all_items'         => 'Semua Merek',
+            'parent_item'       => 'Induk Merek',
+            'parent_item_colon' => 'Induk Merek:',
+            'edit_item'         => 'Edit Merek',
+            'update_item'       => 'Perbarui Merek',
+            'add_new_item'      => 'Tambah Merek Baru',
+            'new_item_name'     => 'Nama Merek Baru',
+            'menu_name'         => 'Merek',
+        );
+
+        $args = array(
+            'hierarchical'      => true,
+            'labels'            => $labels,
+            'show_ui'           => true,
+            'show_admin_column' => true,
+            'query_var'         => true,
+            'rewrite'           => array('slug' => 'brand'),
+            'show_in_rest'      => true,
+        );
+
+        register_taxonomy('brand', array('post', 'product'), $args);
     }
 
     /**
