@@ -12,66 +12,114 @@ class PostTypes
   public function __construct()
   {
     add_action('init', array($this, 'register_post_types'));
+    add_action('add_meta_boxes', array($this, 'add_kbli_meta_box'));
+    add_action('save_post', array($this, 'save_kbli_meta'));
   }
 
   public function register_post_types()
   {
-    // Example: Register 'Project' Custom Post Type
-    // Uncomment the lines below to enable
-    /*
-        $labels = array(
-            'name'                  => 'Proyek',
-            'singular_name'         => 'Proyek',
-            'menu_name'             => 'Proyek',
-            'name_admin_bar'        => 'Proyek',
-            'archives'              => 'Arsip Proyek',
-            'attributes'            => 'Atribut Proyek',
-            'parent_item_colon'     => 'Induk Proyek:',
-            'all_items'             => 'Semua Proyek',
-            'add_new_item'          => 'Tambah Proyek Baru',
-            'add_new'               => 'Tambah Baru',
-            'new_item'              => 'Proyek Baru',
-            'edit_item'             => 'Edit Proyek',
-            'update_item'           => 'Perbarui Proyek',
-            'view_item'             => 'Lihat Proyek',
-            'view_items'            => 'Lihat Proyek',
-            'search_items'          => 'Cari Proyek',
-            'not_found'             => 'Tidak ditemukan',
-            'not_found_in_trash'    => 'Tidak ditemukan di Tong Sampah',
-            'featured_image'        => 'Gambar Utama',
-            'set_featured_image'    => 'Atur gambar utama',
-            'remove_featured_image' => 'Hapus gambar utama',
-            'use_featured_image'    => 'Gunakan sebagai gambar utama',
-            'insert_into_item'      => 'Masukkan ke dalam proyek',
-            'uploaded_to_this_item' => 'Diunggah ke proyek ini',
-            'items_list'            => 'Daftar proyek',
-            'items_list_navigation' => 'Navigasi daftar proyek',
-            'filter_items_list'     => 'Filter daftar proyek',
-        );
-        $args = array(
-            'label'                 => 'Proyek',
-            'description'           => 'Deskripsi Tipe Postingan',
-            'labels'                => $labels,
-            'supports'              => array('title', 'editor', 'thumbnail', 'excerpt'),
-            'taxonomies'            => array('project_category'), // Make sure this taxonomy is registered
-            'hierarchical'          => false,
-            'public'                => true,
-            'show_ui'               => true,
-            'show_in_menu'          => true,
-            'menu_position'         => 5,
-            'menu_icon'             => 'dashicons-portfolio', // https://developer.wordpress.org/resource/dashicons/
-            'show_in_admin_bar'     => true,
-            'show_in_nav_menus'     => true,
-            'can_export'            => true,
-            'has_archive'           => true,
-            'exclude_from_search'   => false,
-            'publicly_queryable'    => true,
-            'capability_type'       => 'page',
-            'show_in_rest'          => true, // Enable Gutenberg
-        );
-        register_post_type('project', $args);
-        */
+    $this->register_kbli();
+  }
 
-    // You can add more Custom Post Types here
+  private function register_kbli()
+  {
+    $labels = array(
+      'name'                  => 'KBLI',
+      'singular_name'         => 'KBLI',
+      'menu_name'             => 'KBLI',
+      'name_admin_bar'        => 'KBLI',
+      'add_new'               => 'Tambah Baru',
+      'add_new_item'          => 'Tambah KBLI Baru',
+      'new_item'              => 'KBLI Baru',
+      'edit_item'             => 'Edit KBLI',
+      'view_item'             => 'Lihat KBLI',
+      'all_items'             => 'Semua KBLI',
+      'search_items'          => 'Cari KBLI',
+      'not_found'             => 'Tidak ditemukan',
+      'not_found_in_trash'    => 'Tidak ditemukan di Tong Sampah',
+    );
+
+    $args = array(
+      'label'               => 'KBLI',
+      'labels'              => $labels,
+      'supports'            => array('title'),
+      'hierarchical'        => false,
+      'public'              => true,
+      'show_ui'             => true,
+      'show_in_menu'        => true,
+      'menu_position'       => 6,
+      'menu_icon'           => 'dashicons-list-view',
+      'show_in_admin_bar'   => true,
+      'show_in_nav_menus'   => false,
+      'can_export'          => true,
+      'has_archive'         => false,
+      'exclude_from_search' => true,
+      'publicly_queryable'  => true,
+      'capability_type'     => 'post',
+      'show_in_rest'        => true,
+    );
+
+    register_post_type('kbli', $args);
+  }
+
+  public function add_kbli_meta_box()
+  {
+    add_meta_box(
+      'kbli_meta',
+      'Data KBLI',
+      array($this, 'render_kbli_meta_box'),
+      'kbli',
+      'normal',
+      'high'
+    );
+  }
+
+  public function render_kbli_meta_box($post)
+  {
+    wp_nonce_field('kbli_meta_nonce', 'kbli_meta_nonce_field');
+
+    $kode       = get_post_meta($post->ID, '_kbli_kode', true);
+    $keterangan = get_post_meta($post->ID, '_kbli_keterangan', true);
+?>
+<table class="form-table">
+    <tr>
+        <th><label for="kbli_kode">Kode</label></th>
+        <td>
+            <input type="text" id="kbli_kode" name="kbli_kode" value="<?php echo esc_attr($kode); ?>"
+                class="regular-text" />
+        </td>
+    </tr>
+    <tr>
+        <th><label for="kbli_keterangan">Keterangan</label></th>
+        <td>
+            <textarea id="kbli_keterangan" name="kbli_keterangan" class="large-text"
+                rows="3"><?php echo esc_textarea($keterangan); ?></textarea>
+        </td>
+    </tr>
+</table>
+<?php
+  }
+
+  public function save_kbli_meta($post_id)
+  {
+    if (!isset($_POST['kbli_meta_nonce_field']) || !wp_verify_nonce($_POST['kbli_meta_nonce_field'], 'kbli_meta_nonce')) {
+      return;
+    }
+
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+      return;
+    }
+
+    if (!current_user_can('edit_post', $post_id)) {
+      return;
+    }
+
+    if (isset($_POST['kbli_kode'])) {
+      update_post_meta($post_id, '_kbli_kode', sanitize_text_field($_POST['kbli_kode']));
+    }
+
+    if (isset($_POST['kbli_keterangan'])) {
+      update_post_meta($post_id, '_kbli_keterangan', sanitize_textarea_field($_POST['kbli_keterangan']));
+    }
   }
 }
