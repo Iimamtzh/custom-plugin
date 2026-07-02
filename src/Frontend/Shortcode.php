@@ -33,20 +33,16 @@ class Shortcode
         wp_enqueue_style('datatables');
         wp_enqueue_script('datatables');
 
-        $paged   = get_query_var('paged') ? get_query_var('paged') : 1;
-        $per_page = 25;
-
         $query = new \WP_Query(array(
             'post_type'      => 'kbli',
             'post_status'    => 'publish',
-            'posts_per_page' => $per_page,
-            'paged'          => $paged,
+            'posts_per_page' => -1,
             'orderby'        => 'title',
             'order'          => 'ASC',
         ));
 
         $rows = '';
-        $no   = ($paged - 1) * $per_page + 1;
+        $no   = 1;
 
         while ($query->have_posts()) {
             $query->the_post();
@@ -59,11 +55,6 @@ class Shortcode
             $rows .= '<td>' . esc_html($keterangan) . '</td>';
             $rows .= '</tr>';
         }
-
-        $pagination = paginate_links(array(
-            'total'   => $query->max_num_pages,
-            'current' => $paged,
-        ));
 
         wp_reset_postdata();
 
@@ -83,25 +74,44 @@ class Shortcode
             <?php echo $rows; ?>
         </tbody>
     </table>
-    <?php if ($pagination): ?>
-    <div class="kbli-pagination">
-        <?php echo $pagination; ?>
-    </div>
-    <?php endif; ?>
 </div>
 <script>
 jQuery(document).ready(function($) {
     $('#kbli-table').DataTable({
-        paging: false,
+        pageLength: 25,
+        lengthMenu: [
+            [10, 25, 50, 100, -1],
+            [10, 25, 50, 100, 'Semua']
+        ],
         searching: true,
         ordering: true,
-        info: false,
+        info: true,
         language: {
             search: 'Cari:',
+            searchPlaceholder: 'Cari KBLI...',
+            lengthMenu: 'Tampilkan _MENU_ data per halaman',
             zeroRecords: 'Data tidak ditemukan',
-            emptyTable: 'Tidak ada data',
+            info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ data',
+            infoEmpty: 'Menampilkan 0 sampai 0 dari 0 data',
+            infoFiltered: '(disaring dari _MAX_ total data)',
+            paginate: {
+                first: 'Awal',
+                last: 'Akhir',
+                next: '&raquo;',
+                previous: '&laquo;'
+            }
         }
     });
+
+    // Preview image modal
+    var modalImage = document.getElementById('modalImage');
+    if (modalImage) {
+        document.querySelectorAll('.preview-image').forEach(function(img) {
+            img.addEventListener('click', function() {
+                modalImage.src = this.dataset.full || this.src;
+            });
+        });
+    }
 });
 </script>
 <?php
