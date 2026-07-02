@@ -68,43 +68,43 @@ class Shortcode
         wp_reset_postdata();
 
         ob_start();
-        ?>
-        <div class="kbli-table-wrapper">
-            <table id="kbli-table" class="display">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Kode</th>
-                        <th>Judul</th>
-                        <th>Keterangan</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php echo $rows; ?>
-                </tbody>
-            </table>
-            <?php if ($pagination): ?>
-            <div class="kbli-pagination">
-                <?php echo $pagination; ?>
-            </div>
-            <?php endif; ?>
-        </div>
-        <script>
-        jQuery(document).ready(function($) {
-            $('#kbli-table').DataTable({
-                paging: false,
-                searching: true,
-                ordering: true,
-                info: false,
-                language: {
-                    search: 'Cari:',
-                    zeroRecords: 'Data tidak ditemukan',
-                    emptyTable: 'Tidak ada data',
-                }
-            });
-        });
-        </script>
-        <?php
+?>
+<div class="kbli-table-wrapper">
+    <table id="kbli-table" class="display">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Kode</th>
+                <th>Judul</th>
+                <th>Keterangan</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php echo $rows; ?>
+        </tbody>
+    </table>
+    <?php if ($pagination): ?>
+    <div class="kbli-pagination">
+        <?php echo $pagination; ?>
+    </div>
+    <?php endif; ?>
+</div>
+<script>
+jQuery(document).ready(function($) {
+    $('#kbli-table').DataTable({
+        paging: false,
+        searching: true,
+        ordering: true,
+        info: false,
+        language: {
+            search: 'Cari:',
+            zeroRecords: 'Data tidak ditemukan',
+            emptyTable: 'Tidak ada data',
+        }
+    });
+});
+</script>
+<?php
         return ob_get_clean();
     }
 }
