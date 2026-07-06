@@ -61,60 +61,60 @@ class Shortcode
 
         ob_start();
 ?>
-        <div class="kbli-table-wrapper">
-            <table id="kbli-table" class="display">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Kode</th>
-                        <th>Judul</th>
-                        <th>Keterangan</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php echo $rows; ?>
-                </tbody>
-            </table>
-        </div>
-        <script>
-            jQuery(document).ready(function($) {
-                $('#kbli-table').DataTable({
-                    pageLength: 25,
-                    lengthMenu: [
-                        [10, 25, 50, 100, -1],
-                        [10, 25, 50, 100, 'Semua']
-                    ],
-                    searching: true,
-                    ordering: true,
-                    info: true,
-                    language: {
-                        search: 'Cari:',
-                        searchPlaceholder: 'Cari KBLI...',
-                        lengthMenu: 'Tampilkan _MENU_ data per halaman',
-                        zeroRecords: 'Data tidak ditemukan',
-                        info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ data',
-                        infoEmpty: 'Menampilkan 0 sampai 0 dari 0 data',
-                        infoFiltered: '(disaring dari _MAX_ total data)',
-                        paginate: {
-                            first: 'Awal',
-                            last: 'Akhir',
-                            next: '&raquo;',
-                            previous: '&laquo;'
-                        }
-                    }
-                });
+<div class="kbli-table-wrapper">
+    <table id="kbli-table" class="display">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Kode</th>
+                <th>Judul</th>
+                <th>Keterangan</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php echo $rows; ?>
+        </tbody>
+    </table>
+</div>
+<script>
+jQuery(document).ready(function($) {
+    $('#kbli-table').DataTable({
+        pageLength: 25,
+        lengthMenu: [
+            [10, 25, 50, 100, -1],
+            [10, 25, 50, 100, 'Semua']
+        ],
+        searching: true,
+        ordering: true,
+        info: true,
+        language: {
+            search: 'Cari:',
+            searchPlaceholder: 'Cari KBLI...',
+            lengthMenu: 'Tampilkan _MENU_ data per halaman',
+            zeroRecords: 'Data tidak ditemukan',
+            info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ data',
+            infoEmpty: 'Menampilkan 0 sampai 0 dari 0 data',
+            infoFiltered: '(disaring dari _MAX_ total data)',
+            paginate: {
+                first: 'Awal',
+                last: 'Akhir',
+                next: '&raquo;',
+                previous: '&laquo;'
+            }
+        }
+    });
 
-                // Preview image modal
-                var modalImage = document.getElementById('modalImage');
-                if (modalImage) {
-                    document.querySelectorAll('.preview-image').forEach(function(img) {
-                        img.addEventListener('click', function() {
-                            modalImage.src = this.dataset.full || this.src;
-                        });
-                    });
-                }
+    // Preview image modal
+    var modalImage = document.getElementById('modalImage');
+    if (modalImage) {
+        document.querySelectorAll('.preview-image').forEach(function(img) {
+            img.addEventListener('click', function() {
+                modalImage.src = this.dataset.full || this.src;
             });
-        </script>
+        });
+    }
+});
+</script>
 <?php
         return ob_get_clean();
     }
