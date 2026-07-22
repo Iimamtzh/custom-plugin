@@ -16,27 +16,26 @@ class Taxonomies
 
     public function register_taxonomies()
     {
-        // Example: Register 'project_category' Taxonomy
-        // $this->register_project_category();
+        $this->register_kategori_paket();
     }
 
     /**
-     * Register Project Category Taxonomy
+     * Register Kategori Paket Taxonomy
      */
-    private function register_project_category()
+    private function register_kategori_paket()
     {
         $labels = array(
-            'name'              => 'Kategori Proyek',
-            'singular_name'     => 'Kategori Proyek',
-            'search_items'      => 'Cari Kategori Proyek',
-            'all_items'         => 'Semua Kategori Proyek',
-            'parent_item'       => 'Induk Kategori Proyek',
-            'parent_item_colon' => 'Induk Kategori Proyek:',
-            'edit_item'         => 'Edit Kategori Proyek',
-            'update_item'       => 'Perbarui Kategori Proyek',
-            'add_new_item'      => 'Tambah Kategori Proyek Baru',
-            'new_item_name'     => 'Nama Kategori Proyek Baru',
-            'menu_name'         => 'Kategori Proyek',
+            'name'              => 'Kategori Paket',
+            'singular_name'     => 'Kategori Paket',
+            'search_items'      => 'Cari Kategori Paket',
+            'all_items'         => 'Semua Kategori Paket',
+            'parent_item'       => 'Induk Kategori Paket',
+            'parent_item_colon' => 'Induk Kategori Paket:',
+            'edit_item'         => 'Edit Kategori Paket',
+            'update_item'       => 'Perbarui Kategori Paket',
+            'add_new_item'      => 'Tambah Kategori Paket Baru',
+            'new_item_name'     => 'Nama Kategori Paket Baru',
+            'menu_name'         => 'Kategori Paket',
         );
 
         $args = array(
@@ -45,10 +44,10 @@ class Taxonomies
             'show_ui'           => true,
             'show_admin_column' => true,
             'query_var'         => true,
-            'rewrite'           => array('slug' => 'project-category'),
-            'show_in_rest'      => true, // Enable Gutenberg editor support
+            'rewrite'           => array('slug' => 'kategori-paket'),
+            'show_in_rest'      => true,
         );
 
-        register_taxonomy('project_category', array('project'), $args);
+        register_taxonomy('kategori-paket', array('paket-umrah'), $args);
     }
 }

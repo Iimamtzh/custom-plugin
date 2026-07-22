@@ -12,66 +12,301 @@ class PostTypes
   public function __construct()
   {
     add_action('init', array($this, 'register_post_types'));
+    add_action('add_meta_boxes', array($this, 'add_metabox'));
+    add_action('save_post', array($this, 'save_metabox'));
   }
 
   public function register_post_types()
   {
-    // Example: Register 'Project' Custom Post Type
-    // Uncomment the lines below to enable
-    /*
-        $labels = array(
-            'name'                  => 'Proyek',
-            'singular_name'         => 'Proyek',
-            'menu_name'             => 'Proyek',
-            'name_admin_bar'        => 'Proyek',
-            'archives'              => 'Arsip Proyek',
-            'attributes'            => 'Atribut Proyek',
-            'parent_item_colon'     => 'Induk Proyek:',
-            'all_items'             => 'Semua Proyek',
-            'add_new_item'          => 'Tambah Proyek Baru',
-            'add_new'               => 'Tambah Baru',
-            'new_item'              => 'Proyek Baru',
-            'edit_item'             => 'Edit Proyek',
-            'update_item'           => 'Perbarui Proyek',
-            'view_item'             => 'Lihat Proyek',
-            'view_items'            => 'Lihat Proyek',
-            'search_items'          => 'Cari Proyek',
-            'not_found'             => 'Tidak ditemukan',
-            'not_found_in_trash'    => 'Tidak ditemukan di Tong Sampah',
-            'featured_image'        => 'Gambar Utama',
-            'set_featured_image'    => 'Atur gambar utama',
-            'remove_featured_image' => 'Hapus gambar utama',
-            'use_featured_image'    => 'Gunakan sebagai gambar utama',
-            'insert_into_item'      => 'Masukkan ke dalam proyek',
-            'uploaded_to_this_item' => 'Diunggah ke proyek ini',
-            'items_list'            => 'Daftar proyek',
-            'items_list_navigation' => 'Navigasi daftar proyek',
-            'filter_items_list'     => 'Filter daftar proyek',
-        );
-        $args = array(
-            'label'                 => 'Proyek',
-            'description'           => 'Deskripsi Tipe Postingan',
-            'labels'                => $labels,
-            'supports'              => array('title', 'editor', 'thumbnail', 'excerpt'),
-            'taxonomies'            => array('project_category'), // Make sure this taxonomy is registered
-            'hierarchical'          => false,
-            'public'                => true,
-            'show_ui'               => true,
-            'show_in_menu'          => true,
-            'menu_position'         => 5,
-            'menu_icon'             => 'dashicons-portfolio', // https://developer.wordpress.org/resource/dashicons/
-            'show_in_admin_bar'     => true,
-            'show_in_nav_menus'     => true,
-            'can_export'            => true,
-            'has_archive'           => true,
-            'exclude_from_search'   => false,
-            'publicly_queryable'    => true,
-            'capability_type'       => 'page',
-            'show_in_rest'          => true, // Enable Gutenberg
-        );
-        register_post_type('project', $args);
-        */
+    $this->register_paket_umrah();
+    $this->register_paket_umrah_meta();
+  }
 
-    // You can add more Custom Post Types here
+  private function register_paket_umrah()
+  {
+    $labels = array(
+      'name'                  => 'Paket Umrah',
+      'singular_name'         => 'Paket Umrah',
+      'menu_name'             => 'Paket Umrah',
+      'name_admin_bar'        => 'Paket Umrah',
+      'archives'              => 'Arsip Paket Umrah',
+      'attributes'            => 'Atribut Paket Umrah',
+      'parent_item_colon'     => 'Induk Paket Umrah:',
+      'all_items'             => 'Semua Paket Umrah',
+      'add_new_item'          => 'Tambah Paket Umrah Baru',
+      'add_new'               => 'Tambah Baru',
+      'new_item'              => 'Paket Umrah Baru',
+      'edit_item'             => 'Edit Paket Umrah',
+      'update_item'           => 'Perbarui Paket Umrah',
+      'view_item'             => 'Lihat Paket Umrah',
+      'view_items'            => 'Lihat Paket Umrah',
+      'search_items'          => 'Cari Paket Umrah',
+      'not_found'             => 'Tidak ditemukan',
+      'not_found_in_trash'    => 'Tidak ditemukan di Tong Sampah',
+      'featured_image'        => 'Gambar Banner',
+      'set_featured_image'    => 'Atur banner',
+      'remove_featured_image' => 'Hapus banner',
+      'use_featured_image'    => 'Gunakan sebagai banner',
+      'insert_into_item'      => 'Masukkan ke dalam paket umrah',
+      'uploaded_to_this_item' => 'Diunggah ke paket umrah ini',
+      'items_list'            => 'Daftar paket umrah',
+      'items_list_navigation' => 'Navigasi daftar paket umrah',
+      'filter_items_list'     => 'Filter daftar paket umrah',
+    );
+
+    $args = array(
+      'label'               => 'Paket Umrah',
+      'description'         => 'Paket perjalanan umrah',
+      'labels'              => $labels,
+      'supports'            => array('title', 'editor', 'thumbnail', 'excerpt'),
+      'taxonomies'          => array('kategori-paket'),
+      'hierarchical'        => false,
+      'public'              => true,
+      'show_ui'             => true,
+      'show_in_menu'        => true,
+      'menu_position'       => 5,
+      'menu_icon'           => 'dashicons-airplane',
+      'show_in_admin_bar'   => true,
+      'show_in_nav_menus'   => true,
+      'can_export'          => true,
+      'has_archive'         => true,
+      'exclude_from_search' => false,
+      'publicly_queryable'  => true,
+      'capability_type'     => 'page',
+      'show_in_rest'        => true,
+    );
+
+    register_post_type('paket-umrah', $args);
+  }
+
+  private function register_paket_umrah_meta()
+  {
+    $fields = array(
+      '_harga'            => array('type' => 'number', 'label' => 'Harga'),
+      '_harga_coret'      => array('type' => 'number', 'label' => 'Harga Coret'),
+      '_durasi'           => array('type' => 'string', 'label' => 'Durasi'),
+      '_maskapai'         => array('type' => 'string', 'label' => 'Maskapai'),
+      '_hotel_mekkah'     => array('type' => 'string', 'label' => 'Hotel Mekkah'),
+      '_hotel_madinah'    => array('type' => 'string', 'label' => 'Hotel Madinah'),
+      '_kuota'            => array('type' => 'number', 'label' => 'Kuota'),
+      '_tanggal_berangkat' => array('type' => 'string', 'label' => 'Tanggal Berangkat'),
+      '_tanggal_pulang'   => array('type' => 'string', 'label' => 'Tanggal Pulang'),
+      '_fasilitas'        => array('type' => 'string', 'label' => 'Fasilitas'),
+      '_tidak_termasuk'   => array('type' => 'string', 'label' => 'Tidak Termasuk'),
+      '_itinerary'        => array('type' => 'string', 'label' => 'Itinerary'),
+      '_gallery'          => array('type' => 'string', 'label' => 'Gallery'),
+    );
+
+    foreach ($fields as $key => $field) {
+      register_post_meta('paket-umrah', $key, array(
+        'type'         => $field['type'],
+        'description'  => $field['label'],
+        'single'       => true,
+        'show_in_rest' => true,
+        'auth_callback' => function () {
+          return current_user_can('edit_posts');
+        },
+      ));
+    }
+  }
+
+  public function add_metabox()
+  {
+    add_meta_box(
+      'paket_umrah_fields',
+      'Detail Paket Umrah',
+      array($this, 'render_metabox'),
+      'paket-umrah',
+      'normal',
+      'high'
+    );
+  }
+
+  public function render_metabox($post)
+  {
+    wp_nonce_field('paket_umrah_metabox', 'paket_umrah_nonce');
+
+    $fields = array(
+      '_harga'             => array('label' => 'Harga',              'type' => 'number', 'placeholder' => 'Contoh: 25000000'),
+      '_harga_coret'       => array('label' => 'Harga Coret',        'type' => 'number', 'placeholder' => 'Contoh: 28000000'),
+      '_durasi'            => array('label' => 'Durasi',             'type' => 'text',   'placeholder' => 'Contoh: 9 Hari'),
+      '_maskapai'          => array('label' => 'Maskapai',           'type' => 'text',   'placeholder' => 'Contoh: Saudi Airlines'),
+      '_hotel_mekkah'      => array('label' => 'Hotel Mekkah',       'type' => 'text',   'placeholder' => 'Contoh: Pullman Zamzam'),
+      '_hotel_madinah'     => array('label' => 'Hotel Madinah',      'type' => 'text',   'placeholder' => 'Contoh: Al Haram Hotel'),
+      '_kuota'             => array('label' => 'Kuota',              'type' => 'number', 'placeholder' => 'Contoh: 45'),
+      '_tanggal_berangkat' => array('label' => 'Tanggal Berangkat',  'type' => 'date'),
+      '_tanggal_pulang'    => array('label' => 'Tanggal Pulang',     'type' => 'date'),
+      '_fasilitas'         => array('label' => 'Fasilitas',          'type' => 'wysiwyg', 'settings' => array('textarea_rows' => 5)),
+      '_tidak_termasuk'    => array('label' => 'Tidak Termasuk',     'type' => 'wysiwyg', 'settings' => array('textarea_rows' => 5)),
+      '_itinerary'         => array('label' => 'Itinerary',          'type' => 'wysiwyg', 'settings' => array('textarea_rows' => 8)),
+      '_gallery'           => array('label' => 'Gallery',            'type' => 'gallery'),
+    );
+
+    echo '<table class="form-table"><tbody>';
+
+    foreach ($fields as $key => $field) {
+      $value = get_post_meta($post->ID, $key, true);
+      $esc_value = esc_attr($value);
+      echo '<tr>';
+      echo '<th><label for="' . esc_attr($key) . '">' . esc_html($field['label']) . '</label></th>';
+      echo '<td>';
+
+      switch ($field['type']) {
+        case 'wysiwyg':
+          $editor_id = str_replace('_', '-', $key);
+          wp_editor($value, $editor_id, array(
+            'textarea_name' => $key,
+            'textarea_rows' => $field['settings']['textarea_rows'],
+            'media_buttons' => true,
+          ));
+          break;
+        case 'gallery':
+          $ids = $value ? explode(',', $value) : array();
+          echo '<div class="paket-gallery-field">';
+          echo '<input type="hidden" id="' . esc_attr($key) . '" name="' . esc_attr($key) . '" value="' . $esc_value . '" />';
+          echo '<div class="paket-gallery-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;">';
+          foreach ($ids as $id) {
+            $id = trim($id);
+            if ($id) {
+              echo '<div class="gallery-item" style="position:relative;width:100px;">';
+              echo wp_get_attachment_image($id, 'thumbnail', false, array('style' => 'width:100%;height:auto;'));
+              echo '</div>';
+            }
+          }
+          echo '</div>';
+          echo '<button type="button" class="button paket-gallery-btn" data-target="' . esc_attr($key) . '">Pilih Gambar</button> ';
+          echo '<button type="button" class="button paket-gallery-clear-btn" data-target="' . esc_attr($key) . '">Hapus Semua</button>';
+          echo '</div>';
+          break;
+        default:
+          echo '<input type="' . esc_attr($field['type']) . '" id="' . esc_attr($key) . '" name="' . esc_attr($key) . '" value="' . $esc_value . '" class="large-text" placeholder="' . esc_attr($field['placeholder'] ?? '') . '" />';
+          break;
+      }
+
+      echo '</td></tr>';
+    }
+
+    echo '</tbody></table>';
+
+    // Enqueue media uploader script
+    $this->enqueue_media_script();
+  }
+
+  private function enqueue_media_script()
+  {
+    static $enqueued = false;
+    if ($enqueued) return;
+    $enqueued = true;
+?>
+    <script>
+      jQuery(document).ready(function($) {
+        var mediaFrame;
+
+        // Gallery upload
+        $(document).on('click', '.paket-gallery-btn', function(e) {
+          e.preventDefault();
+          var target = $(this).data('target');
+          var btn = $(this);
+
+          if (mediaFrame) mediaFrame.close();
+
+          mediaFrame = wp.media({
+            title: 'Pilih Gambar Gallery',
+            button: {
+              text: 'Tambahkan ke Gallery'
+            },
+            multiple: true
+          });
+
+          mediaFrame.on('select', function() {
+            var selection = mediaFrame.state().get('selection');
+            var ids = $('#' + target).val() ? $('#' + target).val().split(',') : [];
+
+            selection.each(function(attachment) {
+              ids.push(attachment.id);
+            });
+
+            ids = ids.filter(function(v, i, a) {
+              return a.indexOf(v) === i;
+            });
+            $('#' + target).val(ids.join(','));
+
+            // Refresh preview
+            var preview = btn.siblings('.paket-gallery-preview');
+            preview.html('');
+            ids.forEach(function(id) {
+              $.ajax({
+                url: ajaxurl,
+                data: {
+                  action: 'get_attachment_thumbnail',
+                  id: id
+                },
+                success: function(html) {
+                  preview.append(
+                    '<div class="gallery-item" style="position:relative;width:100px;">' +
+                    html + '</div>');
+                }
+              });
+            });
+          });
+
+          mediaFrame.open();
+        });
+
+        // Gallery clear
+        $(document).on('click', '.paket-gallery-clear-btn', function(e) {
+          e.preventDefault();
+          var target = $(this).data('target');
+          $('#' + target).val('');
+          $(this).siblings('.paket-gallery-preview').html('');
+        });
+      });
+    </script>
+    <style>
+      .paket-gallery-field .gallery-item {
+        position: relative;
+        width: 100px;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+    </style>
+<?php
+  }
+
+  public function save_metabox($post_id)
+  {
+    if (!isset($_POST['paket_umrah_nonce'])) return;
+    if (!wp_verify_nonce($_POST['paket_umrah_nonce'], 'paket_umrah_metabox')) return;
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
+    if (!current_user_can('edit_page', $post_id)) return;
+
+    $fields = array(
+      '_harga',
+      '_harga_coret',
+      '_durasi',
+      '_maskapai',
+      '_hotel_mekkah',
+      '_hotel_madinah',
+      '_kuota',
+      '_tanggal_berangkat',
+      '_tanggal_pulang',
+      '_fasilitas',
+      '_tidak_termasuk',
+      '_itinerary',
+      '_gallery',
+    );
+
+    foreach ($fields as $field) {
+      if (isset($_POST[$field])) {
+        $wysiwyg_fields = array('_fasilitas', '_tidak_termasuk', '_itinerary');
+        if (in_array($field, $wysiwyg_fields)) {
+          update_post_meta($post_id, $field, wp_kses_post($_POST[$field]));
+        } elseif (is_array($_POST[$field])) {
+          update_post_meta($post_id, $field, sanitize_text_field(implode(',', $_POST[$field])));
+        } else {
+          update_post_meta($post_id, $field, sanitize_text_field($_POST[$field]));
+        }
+      }
+    }
   }
 }
