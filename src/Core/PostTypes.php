@@ -91,10 +91,10 @@ class PostTypes
       '_kuota'            => array('type' => 'number', 'label' => 'Kuota'),
       '_tanggal_berangkat' => array('type' => 'string', 'label' => 'Tanggal Berangkat'),
       '_tanggal_pulang'   => array('type' => 'string', 'label' => 'Tanggal Pulang'),
-      '_fasilitas'        => array('type' => 'string', 'label' => 'Fasilitas'),
-      '_tidak_termasuk'   => array('type' => 'string', 'label' => 'Tidak Termasuk'),
+      '_fasilitas'        => array('type' => 'string', 'label' => 'Benefit'),
+      '_kenapa'           => array('type' => 'string', 'label' => 'Kenapa'),
+      '_syarat_ketentuan' => array('type' => 'string', 'label' => 'Syarat & Ketentuan'),
       '_itinerary'        => array('type' => 'string', 'label' => 'Itinerary'),
-      '_gallery'          => array('type' => 'string', 'label' => 'Gallery'),
     );
 
     foreach ($fields as $key => $field) {
@@ -136,10 +136,10 @@ class PostTypes
       '_kuota'             => array('label' => 'Kuota',              'type' => 'number', 'placeholder' => 'Contoh: 45'),
       '_tanggal_berangkat' => array('label' => 'Tanggal Berangkat',  'type' => 'date'),
       '_tanggal_pulang'    => array('label' => 'Tanggal Pulang',     'type' => 'date'),
-      '_fasilitas'         => array('label' => 'Fasilitas',          'type' => 'wysiwyg', 'settings' => array('textarea_rows' => 5)),
-      '_tidak_termasuk'    => array('label' => 'Tidak Termasuk',     'type' => 'wysiwyg', 'settings' => array('textarea_rows' => 5)),
-      '_itinerary'         => array('label' => 'Itinerary',          'type' => 'wysiwyg', 'settings' => array('textarea_rows' => 8)),
-      '_gallery'           => array('label' => 'Gallery',            'type' => 'gallery'),
+      '_fasilitas'         => array('label' => 'Benefit',             'type' => 'wysiwyg', 'settings' => array('textarea_rows' => 5)),
+      '_kenapa'            => array('label' => 'Kenapa',              'type' => 'wysiwyg', 'settings' => array('textarea_rows' => 5)),
+      '_syarat_ketentuan'  => array('label' => 'Syarat & Ketentuan',  'type' => 'wysiwyg', 'settings' => array('textarea_rows' => 5)),
+      '_itinerary'         => array('label' => 'Itinerary',           'type' => 'wysiwyg', 'settings' => array('textarea_rows' => 8)),
     );
 
     echo '<table class="form-table"><tbody>';
@@ -160,24 +160,6 @@ class PostTypes
             'media_buttons' => true,
           ));
           break;
-        case 'gallery':
-          $ids = $value ? explode(',', $value) : array();
-          echo '<div class="paket-gallery-field">';
-          echo '<input type="hidden" id="' . esc_attr($key) . '" name="' . esc_attr($key) . '" value="' . $esc_value . '" />';
-          echo '<div class="paket-gallery-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;">';
-          foreach ($ids as $id) {
-            $id = trim($id);
-            if ($id) {
-              echo '<div class="gallery-item" style="position:relative;width:100px;">';
-              echo wp_get_attachment_image($id, 'thumbnail', false, array('style' => 'width:100%;height:auto;'));
-              echo '</div>';
-            }
-          }
-          echo '</div>';
-          echo '<button type="button" class="button paket-gallery-btn" data-target="' . esc_attr($key) . '">Pilih Gambar</button> ';
-          echo '<button type="button" class="button paket-gallery-clear-btn" data-target="' . esc_attr($key) . '">Hapus Semua</button>';
-          echo '</div>';
-          break;
         default:
           echo '<input type="' . esc_attr($field['type']) . '" id="' . esc_attr($key) . '" name="' . esc_attr($key) . '" value="' . $esc_value . '" class="large-text" placeholder="' . esc_attr($field['placeholder'] ?? '') . '" />';
           break;
@@ -187,90 +169,6 @@ class PostTypes
     }
 
     echo '</tbody></table>';
-
-    // Enqueue media uploader script
-    $this->enqueue_media_script();
-  }
-
-  private function enqueue_media_script()
-  {
-    static $enqueued = false;
-    if ($enqueued) return;
-    $enqueued = true;
-?>
-    <script>
-      jQuery(document).ready(function($) {
-        var mediaFrame;
-
-        // Gallery upload
-        $(document).on('click', '.paket-gallery-btn', function(e) {
-          e.preventDefault();
-          var target = $(this).data('target');
-          var btn = $(this);
-
-          if (mediaFrame) mediaFrame.close();
-
-          mediaFrame = wp.media({
-            title: 'Pilih Gambar Gallery',
-            button: {
-              text: 'Tambahkan ke Gallery'
-            },
-            multiple: true
-          });
-
-          mediaFrame.on('select', function() {
-            var selection = mediaFrame.state().get('selection');
-            var ids = $('#' + target).val() ? $('#' + target).val().split(',') : [];
-
-            selection.each(function(attachment) {
-              ids.push(attachment.id);
-            });
-
-            ids = ids.filter(function(v, i, a) {
-              return a.indexOf(v) === i;
-            });
-            $('#' + target).val(ids.join(','));
-
-            // Refresh preview
-            var preview = btn.siblings('.paket-gallery-preview');
-            preview.html('');
-            ids.forEach(function(id) {
-              $.ajax({
-                url: ajaxurl,
-                data: {
-                  action: 'get_attachment_thumbnail',
-                  id: id
-                },
-                success: function(html) {
-                  preview.append(
-                    '<div class="gallery-item" style="position:relative;width:100px;">' +
-                    html + '</div>');
-                }
-              });
-            });
-          });
-
-          mediaFrame.open();
-        });
-
-        // Gallery clear
-        $(document).on('click', '.paket-gallery-clear-btn', function(e) {
-          e.preventDefault();
-          var target = $(this).data('target');
-          $('#' + target).val('');
-          $(this).siblings('.paket-gallery-preview').html('');
-        });
-      });
-    </script>
-    <style>
-      .paket-gallery-field .gallery-item {
-        position: relative;
-        width: 100px;
-        border-radius: 4px;
-        overflow: hidden;
-      }
-    </style>
-<?php
   }
 
   public function save_metabox($post_id)
@@ -291,14 +189,14 @@ class PostTypes
       '_tanggal_berangkat',
       '_tanggal_pulang',
       '_fasilitas',
-      '_tidak_termasuk',
+      '_kenapa',
+      '_syarat_ketentuan',
       '_itinerary',
-      '_gallery',
     );
 
     foreach ($fields as $field) {
       if (isset($_POST[$field])) {
-        $wysiwyg_fields = array('_fasilitas', '_tidak_termasuk', '_itinerary');
+        $wysiwyg_fields = array('_fasilitas', '_kenapa', '_syarat_ketentuan', '_itinerary');
         if (in_array($field, $wysiwyg_fields)) {
           update_post_meta($post_id, $field, wp_kses_post($_POST[$field]));
         } elseif (is_array($_POST[$field])) {
