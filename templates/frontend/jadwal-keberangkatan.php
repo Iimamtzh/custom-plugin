@@ -14,9 +14,9 @@ if (!defined('ABSPATH')) {
 <div class="jadwal-keberangkatan-wrapper">
 
     <?php if ($kategori_label): ?>
-        <h3 class="jadwal-kategori-title">
-            <?php echo esc_html(sprintf(__('Jadwal Keberangkatan: %s', 'custom-plugin'), $kategori_label)); ?>
-        </h3>
+    <h3 class="jadwal-kategori-title">
+        <?php echo esc_html(sprintf(__('Jadwal Keberangkatan: %s', 'custom-plugin'), $kategori_label)); ?>
+    </h3>
     <?php endif; ?>
 
     <div class="jadwal-table-responsive">
@@ -34,34 +34,34 @@ if (!defined('ABSPATH')) {
             </thead>
             <tbody>
                 <?php foreach ($rows as $row): ?>
-                    <tr>
-                        <td data-label="<?php esc_attr_e('Paket', 'custom-plugin'); ?>">
-                            <a href="<?php echo esc_url($row['url']); ?>">
-                                <?php echo esc_html($row['paket']); ?>
-                            </a>
-                        </td>
-                        <td data-label="<?php esc_attr_e('Berangkat', 'custom-plugin'); ?>">
-                            <?php echo esc_html($row['tanggal']); ?>
-                        </td>
-                        <td data-label="<?php esc_attr_e('Pulang', 'custom-plugin'); ?>">
-                            <?php echo esc_html($row['pulang']); ?>
-                        </td>
-                        <td data-label="<?php esc_attr_e('Durasi', 'custom-plugin'); ?>">
-                            <?php echo esc_html($row['durasi']); ?>
-                        </td>
-                        <td data-label="<?php esc_attr_e('Maskapai', 'custom-plugin'); ?>">
-                            <?php echo esc_html($row['maskapai']); ?>
-                        </td>
-                        <td data-label="<?php esc_attr_e('Harga', 'custom-plugin'); ?>">
-                            <?php if ($row['harga_coret']): ?>
-                                <span class="harga-coret"><?php echo esc_html($row['harga_coret']); ?></span>
-                            <?php endif; ?>
-                            <span class="harga"><?php echo esc_html($row['harga']); ?></span>
-                        </td>
-                        <td data-label="<?php esc_attr_e('Status', 'custom-plugin'); ?>">
-                            <?php echo $row['tersedia']; ?>
-                        </td>
-                    </tr>
+                <tr>
+                    <td data-label="<?php esc_attr_e('Paket', 'custom-plugin'); ?>">
+                        <a href="<?php echo esc_url($row['url']); ?>">
+                            <?php echo esc_html($row['paket']); ?>
+                        </a>
+                    </td>
+                    <td data-label="<?php esc_attr_e('Berangkat', 'custom-plugin'); ?>">
+                        <?php echo esc_html($row['tanggal']); ?>
+                    </td>
+                    <td data-label="<?php esc_attr_e('Pulang', 'custom-plugin'); ?>">
+                        <?php echo esc_html($row['pulang']); ?>
+                    </td>
+                    <td data-label="<?php esc_attr_e('Durasi', 'custom-plugin'); ?>">
+                        <?php echo esc_html($row['durasi']); ?>
+                    </td>
+                    <td data-label="<?php esc_attr_e('Maskapai', 'custom-plugin'); ?>">
+                        <?php echo esc_html($row['maskapai']); ?>
+                    </td>
+                    <td data-label="<?php esc_attr_e('Harga', 'custom-plugin'); ?>">
+                        <?php if ($row['harga_coret']): ?>
+                        <span class="harga-coret"><?php echo esc_html($row['harga_coret']); ?></span>
+                        <?php endif; ?>
+                        <span class="harga"><?php echo esc_html($row['harga']); ?></span>
+                    </td>
+                    <td data-label="<?php esc_attr_e('Status', 'custom-plugin'); ?>">
+                        <?php echo $row['tersedia']; ?>
+                    </td>
+                </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>

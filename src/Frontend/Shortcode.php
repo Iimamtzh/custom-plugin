@@ -17,6 +17,7 @@ class Shortcode
     public function __construct()
     {
         add_shortcode('jadwal_keberangkatan', array($this, 'jadwal_keberangkatan'));
+        add_shortcode('harga_paket', array($this, 'harga_paket'));
     }
 
     /**
@@ -116,6 +117,48 @@ class Shortcode
         return Template::get('frontend/jadwal-keberangkatan', array(
             'rows'           => $rows,
             'kategori_label' => $kategori_label,
+        ));
+    }
+
+    /**
+     * Shortcode: [harga_paket id="" style=""]
+     * 
+     * Menampilkan harga paket umrah.
+     * Style: 'coret' = tampilkan harga coret + harga
+     *        ''      = tampilkan harga saja (default)
+     * 
+     * @param array $atts
+     * @return string
+     */
+    public function harga_paket($atts)
+    {
+        $atts = shortcode_atts(array(
+            'id'    => 0,
+            'style' => '', // coret
+        ), $atts, 'harga_paket');
+
+        $post_id = intval($atts['id']);
+
+        // Jika tidak ada ID, ambil dari current post
+        if (!$post_id) {
+            $post_id = get_the_ID();
+        }
+
+        if (!$post_id || get_post_type($post_id) !== 'paket-umrah') {
+            return '';
+        }
+
+        $harga       = get_post_meta($post_id, '_harga', true);
+        $harga_coret = get_post_meta($post_id, '_harga_coret', true);
+
+        if (!$harga) {
+            return '';
+        }
+
+        return Template::get('frontend/harga-paket', array(
+            'harga'       => intval($harga),
+            'harga_coret' => intval($harga_coret),
+            'style'       => $atts['style'],
         ));
     }
 }
