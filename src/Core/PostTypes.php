@@ -72,6 +72,68 @@ class PostTypes
         register_post_type('project', $args);
         */
 
+    $this->register_catatan_malvocs();
+
     // You can add more Custom Post Types here
+  }
+
+  /**
+   * Register Catatan Malvocs Custom Post Type
+   */
+  private function register_catatan_malvocs()
+  {
+    $labels = array(
+      'name'                  => 'Catatan Malvocs',
+      'singular_name'         => 'Catatan Malvocs',
+      'menu_name'             => 'Catatan Malvocs',
+      'name_admin_bar'        => 'Catatan Malvocs',
+      'archives'              => 'Arsip Catatan',
+      'attributes'            => 'Atribut Catatan',
+      'parent_item_colon'     => 'Induk Catatan:',
+      'all_items'             => 'Semua Catatan',
+      'add_new_item'          => 'Tambah Catatan Baru',
+      'add_new'               => 'Tambah Baru',
+      'new_item'              => 'Catatan Baru',
+      'edit_item'             => 'Edit Catatan',
+      'update_item'           => 'Perbarui Catatan',
+      'view_item'             => 'Lihat Catatan',
+      'view_items'            => 'Lihat Catatan',
+      'search_items'          => 'Cari Catatan',
+      'not_found'             => 'Tidak ditemukan',
+      'not_found_in_trash'    => 'Tidak ditemukan di Tong Sampah',
+      'featured_image'        => 'Gambar Utama',
+      'set_featured_image'    => 'Atur gambar utama',
+      'remove_featured_image' => 'Hapus gambar utama',
+      'use_featured_image'    => 'Gunakan sebagai gambar utama',
+      'insert_into_item'      => 'Masukkan ke dalam catatan',
+      'uploaded_to_this_item' => 'Diunggah ke catatan ini',
+      'items_list'            => 'Daftar catatan',
+      'items_list_navigation' => 'Navigasi daftar catatan',
+      'filter_items_list'     => 'Filter daftar catatan',
+    );
+
+    $args = array(
+      'label'               => 'Catatan Malvocs',
+      'description'         => 'Post type untuk catatan guru Malvocs',
+      'labels'              => $labels,
+      'supports'            => array('title', 'editor', 'thumbnail', 'excerpt', 'author', 'comments'),
+      'taxonomies'          => array('kategori_catatan_malvocs'),
+      'hierarchical'        => false,
+      'public'              => true,
+      'show_ui'             => true,
+      'show_in_menu'        => true,
+      'menu_position'       => 5,
+      'menu_icon'           => 'dashicons-welcome-write-blog',
+      'show_in_admin_bar'   => true,
+      'show_in_nav_menus'   => true,
+      'can_export'          => true,
+      'has_archive'         => true,
+      'exclude_from_search' => false,
+      'publicly_queryable'  => true,
+      'capability_type'     => 'post',
+      'show_in_rest'        => true,
+    );
+
+    register_post_type('catatan_malvocs', $args);
   }
 }
