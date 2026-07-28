@@ -19,6 +19,7 @@ class Taxonomies
         // Example: Register 'project_category' Taxonomy
         // $this->register_project_category();
         $this->register_kategori_catatan_malvocs();
+        $this->register_kategori_dokumen();
     }
 
     /**
@@ -83,5 +84,37 @@ class Taxonomies
         );
 
         register_taxonomy('kategori_catatan_malvocs', array('catatan_malvocs'), $args);
+    }
+
+    /**
+     * Register Kategori Dokumen Taxonomy
+     */
+    private function register_kategori_dokumen()
+    {
+        $labels = array(
+            'name'              => 'Kategori Dokumen',
+            'singular_name'     => 'Kategori Dokumen',
+            'search_items'      => 'Cari Kategori Dokumen',
+            'all_items'         => 'Semua Kategori',
+            'parent_item'       => 'Induk Kategori',
+            'parent_item_colon' => 'Induk Kategori:',
+            'edit_item'         => 'Edit Kategori',
+            'update_item'       => 'Perbarui Kategori',
+            'add_new_item'      => 'Tambah Kategori Baru',
+            'new_item_name'     => 'Nama Kategori Baru',
+            'menu_name'         => 'Kategori Dokumen',
+        );
+
+        $args = array(
+            'hierarchical'      => true,
+            'labels'            => $labels,
+            'show_ui'           => true,
+            'show_admin_column' => true,
+            'query_var'         => true,
+            'rewrite'           => array('slug' => 'kategori-dokumen'),
+            'show_in_rest'      => true,
+        );
+
+        register_taxonomy('kategori_dokumen', array('dokumen'), $args);
     }
 }

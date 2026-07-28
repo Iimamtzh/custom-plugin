@@ -43,10 +43,10 @@ class Plugin
     new Taxonomies();
     new CoreFeatures();
 
-    // Example modules - uncomment to use or for reference
-    // new Admin();
+    // Initialize module instances
+    new Admin();
     new Frontend();
-    // new Shortcode();
+    new Shortcode();
     // new ExampleController();
   }
 

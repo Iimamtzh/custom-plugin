@@ -16,13 +16,12 @@ class Frontend
 
     public function __construct()
     {
-        // Example: To activate frontend hooks, uncomment below.
-        // add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
+        add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
         add_filter('language_attributes', array($this, 'velocitytheme_color_scheme'));
-        
+
         // Filter with priority and number of arguments
         // add_filter('excerpt_length', array($this, 'custom_excerpt_length'), 999, 1);
-        
+
         // Trigger a custom action (so other devs can hook into your plugin)
         // do_action('custom_plugin_after_frontend_init', $this);
     }
@@ -59,7 +58,7 @@ class Frontend
     public static function get_formatted_price($price)
     {
         $formatted = 'Rp ' . number_format($price, 0, ',', '.');
-        
+
         // Always provide a filter so others can modify your output
         return apply_filters('custom_plugin_format_price', $formatted, $price);
     }
@@ -69,9 +68,12 @@ class Frontend
      */
     public function enqueue_scripts()
     {
-        // Use CUSTOM_PLUGIN_URL and CUSTOM_PLUGIN_VERSION defined in main file.
-        // wp_enqueue_style('custom-plugin-frontend', CUSTOM_PLUGIN_URL . 'assets/frontend/css/frontend.css', array(), CUSTOM_PLUGIN_VERSION);
-        // wp_enqueue_script('custom-plugin-frontend', CUSTOM_PLUGIN_URL . 'assets/frontend/js/frontend.js', array('jquery'), CUSTOM_PLUGIN_VERSION, true);
+        wp_enqueue_style(
+            'cp-dokumen',
+            CUSTOM_PLUGIN_URL . 'assets/frontend/css/dokumen.css',
+            array(),
+            CUSTOM_PLUGIN_VERSION
+        );
     }
 
     /**

@@ -1,0 +1,494 @@
+/**
+ * Custom Plugin - Dokumen Styles
+ * Styling untuk daftar dokumen dan PDF viewer.
+ */
+
+/* ============================================================
+   DAFTAR DOKUMEN - Toolbar
+   ============================================================ */
+.cp-dokumen-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.cp-dokumen-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    max-width: 400px;
+}
+
+.cp-dokumen-search input[type="text"] {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.cp-dokumen-search input[type="text"]:focus {
+    border-color: #2271b1;
+}
+
+.cp-dokumen-search button {
+    background: #2271b1;
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: background 0.2s;
+}
+
+.cp-dokumen-search button:hover {
+    background: #1a5a8b;
+}
+
+.cp-dokumen-search-clear {
+    font-size: 22px;
+    color: #666;
+    text-decoration: none;
+    line-height: 1;
+}
+
+.cp-dokumen-search-clear:hover {
+    color: #d63638;
+}
+
+.cp-dokumen-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.cp-filter-btn {
+    padding: 6px 14px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    font-size: 13px;
+    color: #555;
+    text-decoration: none;
+    transition: all 0.2s;
+    background: #fff;
+}
+
+.cp-filter-btn:hover {
+    border-color: #2271b1;
+    color: #2271b1;
+}
+
+.cp-filter-btn.active {
+    background: #2271b1;
+    color: #fff;
+    border-color: #2271b1;
+}
+
+/* ============================================================
+   DAFTAR DOKUMEN - Grid
+   ============================================================ */
+.cp-dokumen-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+}
+
+.cp-dokumen-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: box-shadow 0.2s, transform 0.2s;
+    display: flex;
+    flex-direction: column;
+}
+
+.cp-dokumen-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+.cp-dokumen-card-thumb img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    display: block;
+}
+
+.cp-dokumen-card-icon {
+    background: #fef2f2;
+    padding: 28px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cp-dokumen-card-body {
+    padding: 16px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.cp-dokumen-card-title {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.cp-dokumen-card-title a {
+    color: #1a1a1a;
+    text-decoration: none;
+}
+
+.cp-dokumen-card-title a:hover {
+    color: #2271b1;
+}
+
+.cp-dokumen-card-cats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.cp-dokumen-card-cat {
+    font-size: 11px;
+    background: #eff6ff;
+    color: #2271b1;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.cp-dokumen-card-excerpt {
+    font-size: 13px;
+    color: #666;
+    margin: 0 0 12px 0;
+    line-height: 1.5;
+    flex: 1;
+}
+
+.cp-dokumen-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.cp-dokumen-card-date {
+    font-size: 12px;
+    color: #999;
+}
+
+.cp-dokumen-card-btn {
+    font-size: 13px;
+    font-weight: 500;
+    color: #fff;
+    background: #2271b1;
+    padding: 6px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.cp-dokumen-card-btn:hover {
+    background: #1a5a8b;
+    color: #fff;
+}
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.cp-dokumen-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: #888;
+}
+
+.cp-dokumen-empty svg {
+    margin-bottom: 16px;
+}
+
+.cp-dokumen-empty p {
+    font-size: 16px;
+    margin: 0 0 16px 0;
+}
+
+.cp-dokumen-reset-btn {
+    display: inline-block;
+    padding: 8px 20px;
+    background: #2271b1;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.cp-dokumen-reset-btn:hover {
+    background: #1a5a8b;
+    color: #fff;
+}
+
+/* ============================================================
+   PAGINATION
+   ============================================================ */
+.cp-dokumen-pagination {
+    margin-top: 32px;
+    text-align: center;
+}
+
+.cp-dokumen-pagination .page-numbers {
+    display: inline-block;
+    padding: 6px 12px;
+    margin: 0 2px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #555;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.cp-dokumen-pagination .page-numbers:hover {
+    border-color: #2271b1;
+    color: #2271b1;
+}
+
+.cp-dokumen-pagination .page-numbers.current {
+    background: #2271b1;
+    color: #fff;
+    border-color: #2271b1;
+}
+
+.cp-dokumen-pagination .page-numbers.dots {
+    border: none;
+}
+
+/* ============================================================
+   SINGLE DOKUMEN - PDF VIEWER
+   ============================================================ */
+.cp-dokumen-viewer-wrapper {
+    max-width: 960px;
+    margin: 0 auto;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.cp-dokumen-viewer-header {
+    margin-bottom: 20px;
+}
+
+.cp-dokumen-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: #555;
+    text-decoration: none;
+    margin-bottom: 16px;
+    transition: color 0.2s;
+}
+
+.cp-dokumen-back-btn:hover {
+    color: #2271b1;
+}
+
+.cp-dokumen-viewer-title {
+    margin: 0 0 8px 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.cp-dokumen-viewer-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 12px;
+}
+
+.cp-dokumen-viewer-cats {
+    color: #2271b1;
+}
+
+.cp-dokumen-viewer-desc {
+    background: #f8f9fa;
+    padding: 14px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #444;
+    line-height: 1.6;
+    margin-top: 12px;
+}
+
+.cp-dokumen-viewer-desc p {
+    margin: 0;
+}
+
+/* Toolbar */
+.cp-dokumen-viewer-toolbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.cp-viewer-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 13px;
+    background: #fff;
+    color: #555;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.cp-viewer-btn:hover {
+    border-color: #2271b1;
+    color: #2271b1;
+}
+
+.cp-viewer-download {
+    background: #2271b1;
+    color: #fff;
+    border-color: #2271b1;
+}
+
+.cp-viewer-download:hover {
+    background: #1a5a8b;
+    color: #fff;
+    border-color: #1a5a8b;
+}
+
+/* PDF Container */
+.cp-dokumen-pdf-container {
+    background: #f0f0f0;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: auto;
+    display: flex;
+    justify-content: center;
+    min-height: 400px;
+}
+
+.cp-dokumen-pdf-container #pdf-render-canvas {
+    display: block;
+    margin: 0 auto;
+}
+
+.cp-dokumen-pdf-container:fullscreen {
+    background: #333;
+    border-radius: 0;
+    border: none;
+}
+
+.cp-dokumen-pdf-container:-webkit-full-screen {
+    background: #333;
+    border-radius: 0;
+    border: none;
+}
+
+/* PDF Controls */
+.cp-dokumen-pdf-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-top: 12px;
+    padding: 10px;
+}
+
+.cp-pdf-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fff;
+    color: #555;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cp-pdf-nav-btn:hover:not(:disabled) {
+    border-color: #2271b1;
+    color: #2271b1;
+}
+
+.cp-pdf-nav-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.cp-pdf-page-info {
+    font-size: 14px;
+    color: #555;
+    font-weight: 500;
+}
+
+/* Error state */
+.cp-dokumen-pdf-error {
+    text-align: center;
+    padding: 40px 20px;
+    background: #fff3f3;
+    border: 1px solid #fcc;
+    border-radius: 8px;
+    color: #d63638;
+}
+
+.cp-dokumen-pdf-error a {
+    color: #2271b1;
+    font-weight: 500;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+    .cp-dokumen-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+
+    .cp-dokumen-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .cp-dokumen-search {
+        max-width: 100%;
+    }
+
+    .cp-dokumen-viewer-toolbar {
+        flex-wrap: wrap;
+    }
+
+    .cp-dokumen-viewer-title {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .cp-dokumen-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -73,6 +73,7 @@ class PostTypes
         */
 
     $this->register_catatan_malvocs();
+    $this->register_dokumen();
 
     // You can add more Custom Post Types here
   }
@@ -135,5 +136,66 @@ class PostTypes
     );
 
     register_post_type('catatan_malvocs', $args);
+  }
+
+  /**
+   * Register Dokumen Custom Post Type
+   * Untuk lampiran tata tertib, surat edaran, dan dokumen sekolah lainnya.
+   */
+  private function register_dokumen()
+  {
+    $labels = array(
+      'name'                  => 'Dokumen',
+      'singular_name'         => 'Dokumen',
+      'menu_name'             => 'Dokumen',
+      'name_admin_bar'        => 'Dokumen',
+      'archives'              => 'Arsip Dokumen',
+      'attributes'            => 'Atribut Dokumen',
+      'parent_item_colon'     => 'Induk Dokumen:',
+      'all_items'             => 'Semua Dokumen',
+      'add_new_item'          => 'Tambah Dokumen Baru',
+      'add_new'               => 'Tambah Baru',
+      'new_item'              => 'Dokumen Baru',
+      'edit_item'             => 'Edit Dokumen',
+      'update_item'           => 'Perbarui Dokumen',
+      'view_item'             => 'Lihat Dokumen',
+      'view_items'            => 'Lihat Dokumen',
+      'search_items'          => 'Cari Dokumen',
+      'not_found'             => 'Tidak ditemukan',
+      'not_found_in_trash'    => 'Tidak ditemukan di Tong Sampah',
+      'featured_image'        => 'Sampul Dokumen',
+      'set_featured_image'    => 'Atur sampul',
+      'remove_featured_image' => 'Hapus sampul',
+      'use_featured_image'    => 'Gunakan sebagai sampul',
+      'insert_into_item'      => 'Masukkan ke dalam dokumen',
+      'uploaded_to_this_item' => 'Diunggah ke dokumen ini',
+      'items_list'            => 'Daftar dokumen',
+      'items_list_navigation' => 'Navigasi daftar dokumen',
+      'filter_items_list'     => 'Filter daftar dokumen',
+    );
+
+    $args = array(
+      'label'               => 'Dokumen',
+      'description'         => 'Post type untuk dokumen dan lampiran sekolah (tata tertib, surat edaran, dll)',
+      'labels'              => $labels,
+      'supports'            => array('title', 'editor', 'thumbnail'),
+      'taxonomies'          => array('kategori_dokumen'),
+      'hierarchical'        => false,
+      'public'              => true,
+      'show_ui'             => true,
+      'show_in_menu'        => true,
+      'menu_position'       => 6,
+      'menu_icon'           => 'dashicons-media-document',
+      'show_in_admin_bar'   => true,
+      'show_in_nav_menus'   => true,
+      'can_export'          => true,
+      'has_archive'         => true,
+      'exclude_from_search' => false,
+      'publicly_queryable'  => true,
+      'capability_type'     => 'post',
+      'show_in_rest'        => true,
+    );
+
+    register_post_type('dokumen', $args);
   }
 }
