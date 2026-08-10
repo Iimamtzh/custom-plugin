@@ -16,8 +16,40 @@ class Taxonomies
 
     public function register_taxonomies()
     {
-        // Example: Register 'project_category' Taxonomy
-        // $this->register_project_category();
+        // Register 'tim_kami_kategori' Taxonomy for Tim Kami post type
+        $this->register_tim_kami_kategori();
+    }
+
+    /**
+     * Register Tim Kami Kategori Taxonomy
+     */
+    private function register_tim_kami_kategori()
+    {
+        $labels = array(
+            'name'              => 'Kategori Tim Kami',
+            'singular_name'     => 'Kategori',
+            'search_items'      => 'Cari Kategori',
+            'all_items'         => 'Semua Kategori',
+            'parent_item'       => 'Induk Kategori',
+            'parent_item_colon' => 'Induk Kategori:',
+            'edit_item'         => 'Edit Kategori',
+            'update_item'       => 'Perbarui Kategori',
+            'add_new_item'      => 'Tambah Kategori Baru',
+            'new_item_name'     => 'Nama Kategori Baru',
+            'menu_name'         => 'Kategori',
+        );
+
+        $args = array(
+            'hierarchical'      => true,
+            'labels'            => $labels,
+            'show_ui'           => true,
+            'show_admin_column' => true,
+            'query_var'         => true,
+            'rewrite'           => array('slug' => 'tim-kami-kategori'),
+            'show_in_rest'      => true, // Enable Gutenberg editor support
+        );
+
+        register_taxonomy('tim_kami_kategori', array('tim_kami'), $args);
     }
 
     /**
