@@ -47,7 +47,7 @@ class Plugin
     // new Admin();
     new \CustomPlugin\Admin\CF7WhatsappSettings();
     new Frontend();
-    // new Shortcode();
+    new Shortcode();
     // new ExampleController();
   }
 

@@ -77,6 +77,10 @@ class Frontend
         wp_localize_script('custom-plugin-cf7-whatsapp', 'CustomPluginCf7Wa', array(
             'number' => $wa,
         ));
+
+        // Dark mode toggle (ikon-only)
+        wp_enqueue_style('custom-plugin-dark-mode', CUSTOM_PLUGIN_URL . 'assets/frontend/css/dark-mode.css', array(), CUSTOM_PLUGIN_VERSION);
+        wp_enqueue_script('custom-plugin-dark-mode', CUSTOM_PLUGIN_URL . 'assets/frontend/js/dark-mode-toggle.js', array(), CUSTOM_PLUGIN_VERSION, true);
     }
 
     /**
