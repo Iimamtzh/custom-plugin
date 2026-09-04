@@ -45,6 +45,7 @@ class Plugin
 
     // Example modules - uncomment to use or for reference
     // new Admin();
+    new \CustomPlugin\Admin\CF7WhatsappSettings();
     new Frontend();
     // new Shortcode();
     // new ExampleController();
