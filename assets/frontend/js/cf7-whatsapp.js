@@ -13,43 +13,15 @@ jQuery(document).ready(function ($) {
 
       // Ambil data
       var name = $form.find('[name="your-name"]').val() || "";
-      var email = $form.find('[name="your-email"]').val() || "";
-      var whatsapp = $form.find('[name="your-whatsapp"]').val() || "";
       var city = $form.find('[name="your-city"]').val() || "";
-      var experience = $form.find('[name="trading-experience"]').val() || "";
-      var readiness = $form.find('[name="learning-readiness"]').val() || "";
-
-      // Ambil checkbox yang dicentang
-      var challenges = [];
-      $form.find('[name="trading-challenge[]"]:checked').each(function () {
-        challenges.push($(this).val());
-      });
-      var challengeText = challenges.join("\n- ");
 
       // Pesan WhatsApp
       var message =
-        "Halo, saya tertarik untuk belajar trading dan ingin bergabung.\n\n" +
-        "*DATA PENDAFTAR*\n\n" +
-        "*Nama Lengkap:* " +
+        "Halo Admin Tradershood, saya " +
         name +
-        "\n\n" +
-        "*Email:* " +
-        email +
-        "\n\n" +
-        "*Nomor WhatsApp Aktif:* " +
-        whatsapp +
-        "\n\n" +
-        "*Kota Domisili Saat Ini:* " +
+        " dari " +
         city +
-        "\n\n" +
-        "*Lama Terjun di Dunia Trading:* " +
-        experience +
-        "\n\n" +
-        "*Tantangan Terbesar:*\n- " +
-        challengeText +
-        "\n\n" +
-        "*Kesiapan Belajar:* " +
-        readiness;
+        ". Saya sudah mengisi formulir pendaftaran di website dan berkomitmen untuk belajar bersama menuju kelompok 2% trader sukses. Mohon info langkah selanjutnya untuk bergabung di komunitas. Terima kasih!";
 
       // URL WhatsApp
       var whatsappURL =
@@ -58,8 +30,8 @@ jQuery(document).ready(function ($) {
         "?text=" +
         encodeURIComponent(message);
 
-      // Langsung buka WhatsApp
-      window.location.href = whatsappURL;
+      // Langsung buka WhatsApp di tab baru
+      window.open(whatsappURL, "_blank", "noopener,noreferrer");
     }
   });
 });
