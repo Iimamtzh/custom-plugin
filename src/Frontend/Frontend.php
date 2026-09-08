@@ -81,6 +81,12 @@ class Frontend
         // Dark mode toggle (ikon-only)
         wp_enqueue_style('custom-plugin-dark-mode', CUSTOM_PLUGIN_URL . 'assets/frontend/css/dark-mode.css', array(), CUSTOM_PLUGIN_VERSION);
         wp_enqueue_script('custom-plugin-dark-mode', CUSTOM_PLUGIN_URL . 'assets/frontend/js/dark-mode-toggle.js', array(), CUSTOM_PLUGIN_VERSION, true);
+
+        // Risk disclosure (validasi checkbox + frasa, file eksternal agar tidak di-strip builder)
+        // Versi pakai filemtime agar tidak ke-cache browser setelah update file JS.
+        $risk_js_path = CUSTOM_PLUGIN_DIR . 'assets/frontend/js/risk-disclosure.js';
+        $risk_js_ver  = file_exists($risk_js_path) ? (string) filemtime($risk_js_path) : CUSTOM_PLUGIN_VERSION;
+        wp_enqueue_script('custom-plugin-risk-disclosure', CUSTOM_PLUGIN_URL . 'assets/frontend/js/risk-disclosure.js', array(), $risk_js_ver, true);
     }
 
     /**
